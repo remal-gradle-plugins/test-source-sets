@@ -73,6 +73,9 @@ allprojects {
             relocateClasses 'name.remal.gradle-plugins.toolkit:toolkit'
 
 
+            apt 'org.projectlombok:lombok'
+
+
             testImplementation 'org.junit.jupiter:junit-jupiter-api'
             testImplementation 'org.junit.jupiter:junit-jupiter-params'
             testImplementation 'org.mockito:mockito-junit-jupiter'
