@@ -40,10 +40,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        'name.remal.template-plugin.v2' {
-            id = 'name.remal.template-plugin.v2'
-            implementationClass = 'name.remal.gradleplugins.template.v2.TemplatePlugin'
-            displayName = 'Template plugin'
+        'name.remal.test-source-sets.v2' {
+            id = 'name.remal.test-source-sets.v2'
+            implementationClass = 'name.remal.gradleplugins.testsourcesets.v2.TestSourceSetsPlugin'
+            displayName = 'A plugin that creates `testSourceSets` extension'
             description = property('repository-description')
         }
     }
