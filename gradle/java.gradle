@@ -32,37 +32,19 @@ allprojects {
             }
         }
 
-        configurations.named('projectDependencyConstraints') { Configuration conf ->
-            String mockitoVersion = '3.9.0'
-
-            conf.dependencies.addAll(
-                [
-                    'org.junit:junit-bom:5.7.1',
-                ].collect { project.dependencies.platform(it) }
-            )
-
-            conf.dependencyConstraints.addAll(
-                [
-                    // Static analysis
-                    'com.google.code.findbugs:jsr305:3.0.2',
-                    'org.jetbrains:annotations:20.1.0',
-
-                    // Compile
-                    "name.remal.gradle-api:local-groovy:${property('gradle-api.version')}",
-                    "name.remal.gradle-api:gradle-api:${property('gradle-api.version')}",
-
-                    // Test
-                    "name.remal.gradle-api:gradle-test-kit:${property('gradle-api.version')}",
-                    "org.mockito:mockito-core:$mockitoVersion",
-                    "org.mockito:mockito-inline:$mockitoVersion",
-                    "org.mockito:mockito-junit-jupiter:$mockitoVersion",
-                ].collect { project.dependencies.constraints.create(it) }
-            )
+        configurations.create('apt') { Configuration conf ->
+            sourceSets.all { SourceSet sourceSet ->
+                configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
+                configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
+            }
         }
 
         dependencies {
             compileOnly 'com.google.code.findbugs:jsr305'
             compileOnly 'org.jetbrains:annotations'
+
+            apt 'org.projectlombok:lombok'
+
 
             testImplementation 'org.junit.jupiter:junit-jupiter-api'
             testImplementation 'org.junit.jupiter:junit-jupiter-params'
