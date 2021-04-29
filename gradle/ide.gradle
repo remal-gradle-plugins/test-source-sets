@@ -1,0 +1,40 @@
+import org.gradle.plugins.ide.idea.model.IdeaLanguageLevel
+
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.gradle.plugin.idea-ext'
+
+idea.project {
+    jdkName = '11'
+    targetBytecodeVersion = JavaVersion.VERSION_1_8
+    languageLevel = new IdeaLanguageLevel(targetBytecodeVersion.majorVersion)
+
+    settings {
+        doNotDetectFrameworks('android', 'web', 'javaeeApplication', 'Spring', 'jpa', 'hibernate', 'AngularCLI')
+
+        encodings {
+            encoding = 'UTF-8'
+            bomPolicy = 'WITH_NO_BOM'
+            properties {
+                encoding = 'ISO-8859-1'
+                transparentNativeToAsciiConversion = true
+            }
+        }
+
+        delegateActions {
+            delegateBuildRunToGradle = true
+            testRunner = 'GRADLE'
+        }
+
+        taskTriggers {
+            afterSync(tasks.maybeCreate('configureIdea'))
+        }
+    }
+}
+
+allprojects {
+    pluginManager.withPlugin('java') {
+        sourceSets.all {
+            configurations[it.compileOnlyConfigurationName].canBeResolved = true
+        }
+    }
+}

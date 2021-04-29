@@ -1,0 +1,2 @@
+# template
+Gradle plugin template

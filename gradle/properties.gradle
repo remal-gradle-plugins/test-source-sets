@@ -1,0 +1,65 @@
+import org.gradle.util.GradleVersion
+
+allprojects {
+    File ciPropertiesFile = rootProject.file("${rootProject.buildDir}/gradle-ci.properties")
+    synchronized (rootProject) {
+        if (!rootProject.hasProperty('ciProperties')) {
+            Properties props = new Properties()
+            rootProject.ext['ciProperties'] = props
+            if (ciPropertiesFile.isFile()) {
+                ciPropertiesFile.newInputStream().withCloseable { props.load(it) }
+            }
+        }
+    }
+
+    def getCiProperty = { String name, String defaultValue ->
+        Properties ciProperties = rootProject.ext['ciProperties']
+        String value = ciProperties.getProperty(name)
+        if (value != null) {
+            return value
+        }
+        value = rootProject.findProperty(name)?.toString()
+        if (value == null) {
+            value = System.getProperty(name)
+        }
+        if (value == null) {
+            String envName = name.replaceAll(/[^\w]/, '_').toUpperCase()
+            value = System.getenv(envName)
+        }
+        if (value != null) {
+            ciProperties.setProperty(name, value)
+            synchronized (rootProject) {
+                ciPropertiesFile.parentFile.mkdirs()
+                ciPropertiesFile.newOutputStream().withCloseable { ciProperties.store(it, null) }
+            }
+            return value
+        } else {
+            return defaultValue
+        }
+    }
+
+    ext['gradle-api.version'] = getCiProperty('gradle-api.version', GradleVersion.current().version)
+
+    ext['disable-compilation'] = getCiProperty('disable-compilation', 'false')
+    ext['disable-tests'] = getCiProperty('disable-test', 'false')
+    ext['disable-verification'] = getCiProperty('disable-verification', 'false')
+    ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
+
+    ext['repository-html-url'] = getCiProperty('repository-html-url', '')
+    ext['repository-description'] = getCiProperty('repository-description', '')
+    ext['repository-topics'] = getCiProperty('repository-topics', '')
+    ext['repository-is-template'] = getCiProperty('repository-is-template', '')
+
+
+    File rootProjectDir = file(rootDir)
+    if (rootProjectDir.name == 'buildSrc') rootProjectDir = rootProjectDir.parentFile
+    ext['rootProjectDir'] = rootProjectDir
+
+    ext['majorVersion'] = project.version.toString().replaceFirst(/^(\d+).*/, '$1')
+
+    ext['baseJavaPackage'] = "${rootProject.group}.${rootProject.name}.v${ext['majorVersion']}${project.path}"
+        .replace('-', '')
+        .replace(':', '.')
+        .replaceFirst(/\.+$/, '')
+        .replaceAll(/\.{2,}/, '.')
+}

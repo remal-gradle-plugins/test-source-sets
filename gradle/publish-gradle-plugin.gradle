@@ -1,0 +1,14 @@
+allprojects {
+    pluginManager.withPlugin('java-gradle-plugin') {
+        apply plugin: 'com.gradle.plugin-publish'
+
+        pluginBundle.with {
+            it.website = property('repository-html-url')
+            it.vcsUrl = property('repository-html-url')
+            it.tags = property('repository-topics').toString().split(/,/)
+                .collect { it.trim().toLowerCase() }
+                .findAll { !it.isEmpty() }
+                .findAll { it != 'gradle' && it != 'plugin' }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+allprojects {
+    configurations.create('projectDependencyConstraints') { Configuration conf ->
+        conf.extendsFrom = []
+        conf.visible = false
+        conf.canBeConsumed = false
+        conf.canBeResolved = false
+
+        configurations.matching { it !== conf }.configureEach { extendsFrom(conf) }
+    }
+}

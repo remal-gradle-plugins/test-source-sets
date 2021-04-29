@@ -1,0 +1,279 @@
+name: build
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '*'
+  pull_request: { }
+  schedule:
+  - cron: '43 6 * * *'
+  workflow_dispatch: { }
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4 -Dorg.gradle.warning.mode=all -Dsun.net.client.defaultConnectTimeout=15000 -Dsun.net.client.defaultReadTimeout=600000 -Dsun.io.useCanonCaches=false -Djava.awt.headless=true -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
+
+jobs:
+  populate-cache:
+    if: >-
+      ${{
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+        || (github.event_name == 'push' && !startsWith(github.event.head_commit.message, '[skip ci]') && !startsWith(github.event.head_commit.message, '[push-back]'))
+        || github.event_name != 'push'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 1
+    - name: Cache
+      id: cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/wrapper/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Create cache content
+      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+      run: |
+        ./gradlew downloadDependencies
+
+  build:
+    needs:
+    - populate-cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      repository-isTemplate: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
+      gradle-versions: ${{steps.gradle-versions.outputs.unstableMinors}}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 2
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Retrieve repository info
+      id: repository-info
+      uses: remal-github-actions/retrieve-repository-info@v1
+    - name: Set repository info environment variables
+      run: |
+        echo "REPOSITORY_HTML_URL=${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}" >> "$GITHUB_ENV"
+        echo "REPOSITORY_DESCRIPTION=${{fromJSON(steps.repository-info.outputs.result).description}}" >> "$GITHUB_ENV"
+        echo "REPOSITORY_TOPICS=${{fromJSON(steps.repository-info.outputs.result).topicsString}}" >> "$GITHUB_ENV"
+        echo "REPOSITORY_IS_TEMPLATE=${{fromJSON(steps.repository-info.outputs.result).isTemplate}}" >> "$GITHUB_ENV"
+    - name: Compile classes
+      run: |
+        ./gradlew allClasses
+        echo "DISABLE_COMPILATION=true" >> "$GITHUB_ENV"
+    - name: Build
+      run: |
+        ./gradlew build -Pdisable-test=true
+    - name: Archive workspace
+      run: |
+        tar -cz -f "/tmp/workspace-${{github.run_id}}.tar.gz" `git ls-files -m -o`
+    - name: Upload workspace archive
+      uses: actions/upload-artifact@v2
+      with:
+        name: workspace
+        path: '/tmp/workspace-${{github.run_id}}.tar.gz'
+        if-no-files-found: error
+    - name: Read min supported Gradle version
+      id: min-gradle-version
+      uses: remal-github-actions/read-property@v1
+      with:
+        file: gradle.properties
+        property: 'gradle-api.min-version'
+    - name: Retrieve Gradle versions for testing
+      id: gradle-versions
+      uses: remal-github-actions/retrieve-maven-artifact-versions@v1
+      with:
+        group: name.remal.gradle-api
+        name: gradle-api
+        repository: https://maven.pkg.github.com/remal-gradle-api/packages
+        user: ${{github.actor}}
+        password: ${{github.token}}
+        min: ${{steps.min-gradle-version.outputs.value}}
+
+  cross-versions-tests:
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      DISABLE_COMPILATION: 'true'
+      DISABLE_VERIFICATION_EXCEPT_TESTS: 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        gradle-version: ${{fromJSON(needs.build.outputs.gradle-versions)}}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 1
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Download workspace archive
+      id: download-workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: workspace
+        path: /tmp
+    - name: Unarchive workspace
+      run: |
+        tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Execute tests
+      run: |
+        ./gradlew allTests "-Pgradle-api.version=${{matrix.gradle-version}}"
+
+  cross-versions-tests-success:
+    needs:
+    - cross-versions-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Display success message
+      run: |
+        echo "All cross versions tests executed successfully"
+
+  push-back:
+    if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+    needs:
+    - cross-versions-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DISABLE_COMPILATION: 'true'
+      DISABLE_VERIFICATION: 'true'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 1
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Download workspace archive
+      id: download-workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: workspace
+        path: /tmp
+    - name: Unarchive workspace
+      run: |
+        tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Update Renovate config
+      run: |
+        ./gradlew configureRenovate
+    - name: Update IDEA settings
+      run: |
+        ./gradlew configureIdea
+    - name: Push back
+      env:
+        PUSH_BACK_TOKEN: ${{secrets.PUSH_BACK_TOKEN}}
+      if: ${{env.PUSH_BACK_TOKEN && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')}}
+      uses: remal-github-actions/push-back@v1
+      with:
+        githubToken: ${{env.PUSH_BACK_TOKEN}}
+        message: '[push-back] Push-back updated files during build'
+
+  evaluate-publish-conditions:
+    if: >-
+      ${{
+        github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        && fromJSON(needs.build.outputs.repository-isTemplate) != true
+      }}
+    needs:
+    - build
+    - cross-versions-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Display success message
+      run: |
+        echo "All publish conditions evaluated successfully"
+
+  publish-to-gradle-plugins-portal:
+    needs:
+    - evaluate-publish-conditions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DISABLE_COMPILATION: 'true'
+      DISABLE_VERIFICATION: 'true'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 2
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Download workspace archive
+      id: download-workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: workspace
+        path: /tmp
+    - name: Unarchive workspace
+      run: |
+        tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Execute tests
+      run: |
+        ./gradlew allTests "-Pgradle-api.version=${{matrix.gradle-version}}"
+    - name: Publish to Gradle plugin portal
+      run: |
+        ./gradlew publishPlugins "-Pgradle.publish.key=${{secrets.GRADLE_PLUGINS_PORTAL_KEY}}" "-Pgradle.publish.secret=${{secrets.GRADLE_PLUGINS_PORTAL_SECRET}}"

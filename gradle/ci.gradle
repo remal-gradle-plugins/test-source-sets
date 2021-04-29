@@ -1,0 +1,79 @@
+allprojects {
+
+    gradle.startParameter.showStacktrace = 'ALWAYS'
+
+    tasks.create('downloadDependencies') {
+        doLast {
+            project.configurations
+                .findAll { it.canBeResolved }
+                .findAll { it.name != 'default' }
+                .findAll { it.name != 'archives' }
+                .forEach { configuration ->
+                    configuration.resolvedConfiguration.lenientConfiguration.files
+                }
+        }
+    }
+
+    tasks.register('allClasses') { Task task ->
+        pluginManager.withPlugin('java') {
+            sourceSets.all { SourceSet sourceSet ->
+                task.dependsOn(sourceSet.classesTaskName)
+            }
+        }
+    }
+
+    tasks.register('allTests') { Task task ->
+        task.dependsOn(tasks.matching { it instanceof AbstractTestTask })
+    }
+
+
+    afterEvaluate {
+        def disableTask = { Task task ->
+            task.enabled = false
+            task.onlyIf { false }
+            task.dependsOn = []
+            Iterator registeredFileProperties = task.inputs.registeredFileProperties.iterator()
+            while (registeredFileProperties.hasNext()) {
+                registeredFileProperties.next()
+                registeredFileProperties.remove()
+            }
+        }
+
+        def isVerificationTask = { Task task ->
+            if (task instanceof AbstractTestTask) {
+                return true
+            }
+            if (task instanceof VerificationTask) {
+                return true
+            }
+            if (task instanceof ValidatePlugins) {
+                return true
+            }
+            return false
+        }
+
+
+        if (property('disable-compilation')?.toString()?.toBoolean()) {
+            tasks.matching { it instanceof AbstractCompile }.all { disableTask(it) }
+
+            pluginManager.withPlugin('java') {
+                sourceSets.all { SourceSet sourceSet ->
+                    tasks.matching { it.name == sourceSet.processResourcesTaskName }.all { disableTask(it) }
+                }
+            }
+        }
+
+        if (property('disable-tests')?.toString()?.toBoolean()) {
+            tasks.matching { it instanceof AbstractTestTask }.all { disableTask(it) }
+        }
+
+        if (property('disable-verification')?.toString()?.toBoolean()) {
+            tasks.matching { isVerificationTask(it) }.all { disableTask(it) }
+        }
+
+        if (property('disable-verification-except-tests')?.toString()?.toBoolean()) {
+            tasks.matching { isVerificationTask(it) && !(it instanceof AbstractTestTask) }.all { disableTask(it) }
+        }
+    }
+
+}
