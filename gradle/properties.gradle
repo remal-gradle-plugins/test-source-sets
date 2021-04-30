@@ -12,7 +12,7 @@ allprojects {
         }
     }
 
-    def getCiProperty = { String name, String defaultValue ->
+    def getCiProperty = { String name, String defaultValue, Boolean storeValue ->
         Properties ciProperties = rootProject.ext['ciProperties']
         String value = ciProperties.getProperty(name)
         if (value != null) {
@@ -28,9 +28,11 @@ allprojects {
         }
         if (value != null) {
             ciProperties.setProperty(name, value)
-            synchronized (rootProject) {
-                ciPropertiesFile.parentFile.mkdirs()
-                ciPropertiesFile.newOutputStream().withCloseable { ciProperties.store(it, null) }
+            if (storeValue) {
+                synchronized (rootProject) {
+                    ciPropertiesFile.parentFile.mkdirs()
+                    ciPropertiesFile.newOutputStream().withCloseable { ciProperties.store(it, null) }
+                }
             }
             return value
         } else {
@@ -45,10 +47,10 @@ allprojects {
     ext['disable-verification'] = getCiProperty('disable-verification', 'false')
     ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
 
-    ext['repository-html-url'] = getCiProperty('repository-html-url', '')
-    ext['repository-description'] = getCiProperty('repository-description', '')
-    ext['repository-topics'] = getCiProperty('repository-topics', '')
-    ext['repository-is-template'] = getCiProperty('repository-is-template', '')
+    ext['repository-html-url'] = getCiProperty('repository-html-url', '', true)
+    ext['repository-description'] = getCiProperty('repository-description', '', true)
+    ext['repository-topics'] = getCiProperty('repository-topics', '', true)
+    ext['repository-is-template'] = getCiProperty('repository-is-template', '', true)
 
 
     File rootProjectDir = file(rootDir)
