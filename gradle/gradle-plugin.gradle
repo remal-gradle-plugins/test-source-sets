@@ -9,8 +9,8 @@ allprojects {
         }
 
         dependencies {
-            compileOnly 'name.remal.gradle-api:gradle-api'
-            testImplementation 'name.remal.gradle-api:gradle-api'
+            optional 'name.remal.gradle-api:gradle-api'
+
             testImplementation 'name.remal.gradle-api:gradle-test-kit'
         }
 
