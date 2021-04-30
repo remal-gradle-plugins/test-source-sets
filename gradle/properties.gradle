@@ -15,10 +15,9 @@ allprojects {
     def getCiProperty = { String name, String defaultValue, Boolean storeValue ->
         Properties ciProperties = rootProject.ext['ciProperties']
         String value = ciProperties.getProperty(name)
-        if (value != null) {
-            return value
+        if (value == null) {
+            value = rootProject.findProperty(name)?.toString()
         }
-        value = rootProject.findProperty(name)?.toString()
         if (value == null) {
             value = System.getProperty(name)
         }
@@ -26,6 +25,7 @@ allprojects {
             String envName = name.replaceAll(/[^\w]/, '_').toUpperCase()
             value = System.getenv(envName)
         }
+
         if (value != null) {
             ciProperties.setProperty(name, value)
             if (storeValue) {
