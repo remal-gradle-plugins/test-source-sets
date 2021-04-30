@@ -26,11 +26,13 @@ allprojects {
                     .allModuleDependencies
                     .find { it.moduleGroup == 'org.jetbrains.kotlin' }
                 if (kotlinDep != null) {
-                    deps.add(
-                        project.dependencies.create(
-                            "${kotlinDep.moduleGroup}:kotlin-gradle-plugin:${kotlinDep.moduleVersion}"
-                        )
-                    )
+                    Dependency kotlinPluginDep = project.dependencies.create(
+                        "${kotlinDep.moduleGroup}:kotlin-gradle-plugin:${kotlinDep.moduleVersion}"
+                    ) {
+                        exclude group: 'commons-logging', module: 'commons-logging'
+                    }
+
+                    deps.add(kotlinPluginDep)
                 }
             }
 
