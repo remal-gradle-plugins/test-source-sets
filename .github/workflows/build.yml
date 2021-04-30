@@ -81,11 +81,16 @@ jobs:
       id: repository-info
       uses: remal-github-actions/retrieve-repository-info@v1
     - name: Set repository info environment variables
+      env:
+        REPOSITORY_HTML_URL: ${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}
+        REPOSITORY_DESCRIPTION: ${{fromJSON(steps.repository-info.outputs.result).description}}
+        REPOSITORY_TOPICS: ${{fromJSON(steps.repository-info.outputs.result).topicsString}}
+        REPOSITORY_IS_TEMPLATE: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
       run: |
-        echo "REPOSITORY_HTML_URL=${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}" >> "$GITHUB_ENV"
-        echo "REPOSITORY_DESCRIPTION=${{fromJSON(steps.repository-info.outputs.result).description}}" >> "$GITHUB_ENV"
-        echo "REPOSITORY_TOPICS=${{fromJSON(steps.repository-info.outputs.result).topicsString}}" >> "$GITHUB_ENV"
-        echo "REPOSITORY_IS_TEMPLATE=${{fromJSON(steps.repository-info.outputs.result).isTemplate}}" >> "$GITHUB_ENV"
+        echo "REPOSITORY_HTML_URL=$REPOSITORY_HTML_URL" >> "$GITHUB_ENV"
+        echo "REPOSITORY_DESCRIPTION=REPOSITORY_DESCRIPTION" >> "$GITHUB_ENV"
+        echo "REPOSITORY_TOPICS=REPOSITORY_TOPICS" >> "$GITHUB_ENV"
+        echo "REPOSITORY_IS_TEMPLATE=REPOSITORY_IS_TEMPLATE" >> "$GITHUB_ENV"
     - name: Compile classes
       run: |
         ./gradlew allClasses
