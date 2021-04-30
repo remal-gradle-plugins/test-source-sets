@@ -12,7 +12,7 @@ allprojects {
         }
     }
 
-    def getCiProperty = { String name, String defaultValue, Boolean storeValue ->
+    def getCiProperty = { String name, String defaultValue, boolean storeValue = false ->
         Properties ciProperties = rootProject.ext['ciProperties']
         String value = ciProperties.getProperty(name)
         if (value == null) {
