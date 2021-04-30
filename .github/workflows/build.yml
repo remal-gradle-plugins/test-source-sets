@@ -88,9 +88,9 @@ jobs:
         REPOSITORY_IS_TEMPLATE: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
       run: |
         echo "REPOSITORY_HTML_URL=$REPOSITORY_HTML_URL" >> "$GITHUB_ENV"
-        echo "REPOSITORY_DESCRIPTION=REPOSITORY_DESCRIPTION" >> "$GITHUB_ENV"
-        echo "REPOSITORY_TOPICS=REPOSITORY_TOPICS" >> "$GITHUB_ENV"
-        echo "REPOSITORY_IS_TEMPLATE=REPOSITORY_IS_TEMPLATE" >> "$GITHUB_ENV"
+        echo "REPOSITORY_DESCRIPTION=$REPOSITORY_DESCRIPTION" >> "$GITHUB_ENV"
+        echo "REPOSITORY_TOPICS=$REPOSITORY_TOPICS" >> "$GITHUB_ENV"
+        echo "REPOSITORY_IS_TEMPLATE=$REPOSITORY_IS_TEMPLATE" >> "$GITHUB_ENV"
     - name: Compile classes
       run: |
         ./gradlew allClasses
