@@ -27,8 +27,8 @@ allprojects {
         }
 
         if (value != null) {
-            ciProperties.setProperty(name, value)
             if (storeValue) {
+                ciProperties.setProperty(name, value)
                 synchronized (rootProject) {
                     ciPropertiesFile.parentFile.mkdirs()
                     ciPropertiesFile.newOutputStream().withCloseable { ciProperties.store(it, null) }
@@ -43,7 +43,7 @@ allprojects {
     ext['gradle-api.version'] = getCiProperty('gradle-api.version', GradleVersion.current().version)
 
     ext['disable-compilation'] = getCiProperty('disable-compilation', 'false')
-    ext['disable-tests'] = getCiProperty('disable-test', 'false')
+    ext['disable-tests'] = getCiProperty('disable-tests', 'false')
     ext['disable-verification'] = getCiProperty('disable-verification', 'false')
     ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
 
