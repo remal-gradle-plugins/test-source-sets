@@ -35,8 +35,7 @@ apply from: 'gradle/renovate.gradle'
 
 apply plugin: 'java-gradle-plugin'
 
-configurations.compileOnly.extendsFrom(configurations.correspondingKotlinPlugin)
-configurations.testImplementation.extendsFrom(configurations.correspondingKotlinPlugin)
+configurations.optional.extendsFrom(configurations.correspondingKotlinPlugin)
 
 dependencies {
 }

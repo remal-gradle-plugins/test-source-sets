@@ -2,6 +2,7 @@ package name.remal.gradleplugins.testsourcesets.v2;
 
 import static java.lang.System.identityHashCode;
 import static java.lang.reflect.Proxy.newProxyInstance;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -32,6 +34,7 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
@@ -48,9 +51,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         testSourceSets.add(testSourceSet);
 
-        configureConfigurations(project, testSourceSet, testSourceSets);
-
-        configureIdea(project, sourceSets, testSourceSets);
+        configureConfigurations(project);
+        configureKotlin(project);
+        configureIdea(project);
     }
 
     private static TestSourceSetContainer createTestSourceSetContainer(Project project, SourceSetContainer sourceSets) {
@@ -78,11 +81,11 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         "^get[A-Z].*[a-z]ConfigurationName$"
     );
 
-    private static void configureConfigurations(
-        Project project,
-        SourceSet testSourceSet,
-        TestSourceSetContainer testSourceSets
-    ) {
+    private static void configureConfigurations(Project project) {
+        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+
         val configurationNameMethods = Stream.of(SourceSet.class.getMethods())
             .filter(it -> GET_CONFIGURATION_NAME_METHOD_NAME.matcher(it.getName()).matches())
             .collect(toList());
@@ -115,26 +118,48 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 
-    private static void configureIdea(
-        Project project,
-        SourceSetContainer sourceSets,
-        TestSourceSetContainer testSourceSets
-    ) {
+    private static void configureKotlin(Project project) {
+        val isConfigured = new AtomicBoolean();
+        asList(
+            "kotlin",
+            "kotlin2js",
+            "kotlin-platform-common"
+        ).forEach(pluginId ->
+            project.getPluginManager().withPlugin(pluginId, __ -> {
+                if (isConfigured.compareAndSet(false, true)) {
+                    configureKotlinTarget(project);
+                }
+            })
+        );
+    }
+
+    private static void configureKotlinTarget(Project project) {
+        val kotlin = project.getExtensions().getByType(KotlinSingleTargetExtension.class);
+        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+
+        val kotlinCompilations = kotlin.getTarget().getCompilations();
+        testSourceSets.all(testSourceSet -> {
+            kotlinCompilations.matching(it -> it.getName().equals(testSourceSet.getName())).all(kotlinCompilation -> {
+                kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME));
+            });
+        });
+    }
+
+
+    private static void configureIdea(Project project) {
         project.getPluginManager().withPlugin("idea", __ -> {
             val ideaModel = project.getExtensions().getByType(IdeaModel.class);
             val module = ideaModel.getModule();
             if (module != null) {
-                configureIdeaModule(project, module, sourceSets, testSourceSets);
+                configureIdeaModule(project, module);
             }
         });
     }
 
-    private static void configureIdeaModule(
-        Project project,
-        IdeaModule module,
-        SourceSetContainer sourceSets,
-        TestSourceSetContainer testSourceSets
-    ) {
+    private static void configureIdeaModule(Project project, IdeaModule module) {
+        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+
         testSourceSets.all(testSourceSet -> {
             project.getConfigurations().all(conf -> {
                 if (conf.getName().equals(testSourceSet.getCompileClasspathConfigurationName())
