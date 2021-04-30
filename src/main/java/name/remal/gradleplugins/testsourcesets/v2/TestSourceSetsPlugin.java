@@ -29,16 +29,24 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.internal.IConventionAware;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.testing.Test;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
+import org.gradle.util.GradleVersion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = "testSourceSets";
+
+
+    private static final boolean IS_MODULARITY_SUPPORTED =
+        GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0;
+
 
     @Override
     public void apply(Project project) {
@@ -52,6 +60,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         testSourceSets.add(testSourceSet);
 
         configureConfigurations(project);
+        configureTestTasks(project);
         configureKotlin(project);
         configureIdea(project);
     }
@@ -115,6 +124,32 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 }
             }
         });
+    }
+
+
+    private static void configureTestTasks(Project project) {
+        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+        testSourceSets.whenObjectAdded(testSourceSet -> {
+            val taskName = testSourceSet.getTaskName("test", null);
+            project.getTasks().register(taskName, Test.class, task -> {
+                ConventionMapping conventionMapping = task.getConventionMapping();
+                conventionMapping.map("testClassesDirs", (Callable<FileCollection>) () ->
+                    testSourceSet.getOutput().getClassesDirs()
+                );
+                conventionMapping.map("classpath", (Callable<FileCollection>)
+                    testSourceSet::getRuntimeClasspath
+                );
+                if (IS_MODULARITY_SUPPORTED) {
+                    configureTestTaskModularity(project, task);
+                }
+            });
+        });
+    }
+
+    private static void configureTestTaskModularity(Project project, Test testTask) {
+        JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
+        testTask.getModularity().getInferModulePath()
+            .convention(javaPluginExtension.getModularity().getInferModulePath());
     }
 
 
