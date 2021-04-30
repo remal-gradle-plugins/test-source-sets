@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.plugins.ide.idea.IdeaPlugin;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
+import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -159,11 +159,36 @@ class TestSourceSetsPluginTest extends BaseProjectTestExtension {
         );
     }
 
+
+    @Nested
+    class If_kotlin_plugin_is_applied {
+
+        {
+            project.getPluginManager().apply("kotlin");
+        }
+
+        @Test
+        void all_test_source_sets_are_associated_with_main_compilation() {
+            val kotlin = project.getExtensions().getByType(KotlinSingleTargetExtension.class);
+            val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+            val anotherTestSourceSet = testSourceSets.create("another");
+
+            val compilations = kotlin.getTarget().getCompilations();
+            val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
+            testSourceSets.forEach(testSourceSet -> {
+                val compilation = compilations.getByName(testSourceSet.getName());
+                assertTrue(compilation.getAssociateWith().contains(mainCompilation), testSourceSet.getName());
+            });
+        }
+
+    }
+
+
     @Nested
     class If_idea_plugin_is_applied {
 
         {
-            project.getPluginManager().apply(IdeaPlugin.class);
+            project.getPluginManager().apply("idea");
         }
 
         @Test
