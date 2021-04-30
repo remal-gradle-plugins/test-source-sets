@@ -13,5 +13,31 @@ allprojects {
             testImplementation 'name.remal.gradle-api:gradle-api'
             testImplementation 'name.remal.gradle-api:gradle-test-kit'
         }
+
+
+        configurations.create('correspondingKotlinPlugin') { Configuration conf ->
+            conf.defaultDependencies { deps ->
+                Dependency apiDep = project.dependencies.create(
+                    "name.remal.gradle-api:gradle-api:${property('gradle-api.version')}"
+                )
+                Configuration tempConf = configurations.detachedConfiguration(apiDep)
+                ResolvedDependency kotlinDep = tempConf.resolvedConfiguration
+                    .lenientConfiguration
+                    .allModuleDependencies
+                    .find { it.moduleGroup == 'org.jetbrains.kotlin' }
+                if (kotlinDep != null) {
+                    deps.add(
+                        project.dependencies.create(
+                            "${kotlinDep.moduleGroup}:kotlin-gradle-plugin:${kotlinDep.moduleVersion}"
+                        )
+                    )
+                }
+            }
+
+            conf.extendsFrom = []
+            conf.description(
+                'Kotlin Gradle plugin os the same version, as Kotlin that bundled in the current Gradle instance'
+            )
+        }
     }
 }
