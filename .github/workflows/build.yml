@@ -159,7 +159,7 @@ jobs:
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
     - name: Execute tests
       run: |
-        ./gradlew dependencies
+        ./gradlew dependencies "-Pgradle-api.version=${{matrix.gradle-version}}"
         ./gradlew allTests "-Pgradle-api.version=${{matrix.gradle-version}}"
 
   cross-versions-tests-success:
