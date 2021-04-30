@@ -110,20 +110,4 @@ allprojects {
             }
         }
     }
-
-    pluginManager.withPlugin('java-gradle-plugin') {
-        afterEvaluate {
-            configurations.all { Configuration conf ->
-                conf.dependencies.removeIf {
-                    it instanceof SelfResolvingDependency && it.files.toString() != 'file collection'
-                }
-            }
-        }
-
-        dependencies {
-            compileOnly 'name.remal.gradle-api:gradle-api'
-            testImplementation 'name.remal.gradle-api:gradle-api'
-            testImplementation 'name.remal.gradle-api:gradle-test-kit'
-        }
-    }
 }
