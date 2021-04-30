@@ -32,6 +32,16 @@ allprojects {
             }
         }
 
+        configurations.create('optional') { Configuration conf ->
+            sourceSets.all { SourceSet sourceSet ->
+                if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
+                    configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
+                } else {
+                    configurations[sourceSet.implementationConfigurationName].extendsFrom(conf)
+                }
+            }
+        }
+
         configurations.create('apt') { Configuration conf ->
             sourceSets.all { SourceSet sourceSet ->
                 configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
