@@ -1,5 +1,18 @@
 allprojects {
 
+    String gitRef = property('git-ref')
+    String versionGitRefPrefix = 'refs/tags/v'
+    if (gitRef.startsWith(versionGitRefPrefix)) {
+        String versionFromGitRef = gitRef.substring(versionGitRefPrefix.length())
+        String majorVersion = property('majorVersion')
+        if (!versionFromGitRef.startsWith("${majorVersion}.")) {
+            throw new GradleException(
+                "Version from Git ref doesn't start with major version ${majorVersion}: ${versionFromGitRef}"
+            )
+        }
+        project.version = versionFromGitRef
+    }
+
     gradle.startParameter.showStacktrace = 'ALWAYS'
 
     tasks.create('downloadDependencies') {
