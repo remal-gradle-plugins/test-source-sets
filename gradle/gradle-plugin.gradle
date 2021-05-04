@@ -61,6 +61,7 @@ allprojects {
 
 
         tasks.withType(PluginUnderTestMetadata) {
+            dependsOn('jar')
             pluginClasspath.from = []
             pluginClasspath.from(project.provider { tasks.jar.archiveFile })
         }
