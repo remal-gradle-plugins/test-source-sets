@@ -2,12 +2,14 @@ package name.remal.gradleplugins.testsourcesets.v2;
 
 import static java.lang.System.identityHashCode;
 import static java.lang.reflect.Proxy.newProxyInstance;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static name.remal.gradleplugins.testsourcesets.v2.TestSourceSetsKotlinConfigurer.configureKotlinTestSourceSets;
+import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
+import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -37,11 +38,12 @@ import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
 import org.gradle.util.GradleVersion;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = "testSourceSets";
+
+    public static final String ALL_TESTS_TASK_NAME = "allTests";
 
 
     private static final boolean IS_MODULARITY_SUPPORTED =
@@ -61,8 +63,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
         configureConfigurations(project);
         configureTestTasks(project);
-        configureKotlin(project);
         configureIdea(project);
+
+        configureKotlinTestSourceSets(project);
     }
 
     private static TestSourceSetContainer createTestSourceSetContainer(Project project, SourceSetContainer sourceSets) {
@@ -127,22 +130,46 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 
+    private static final Pattern WORD_TEST_REGEXP = Pattern.compile("(^|[a-z0-9_]|\\b)[Tt]est([A-Z0-9_]|\\b|$)");
+
     private static void configureTestTasks(Project project) {
+        val allTestsTask = project.getTasks().register(ALL_TESTS_TASK_NAME, task -> {
+            task.setGroup(VERIFICATION_GROUP);
+            task.setDescription("Run test task for each test-source-set");
+            task.dependsOn(TEST_TASK_NAME);
+        });
+
         val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
         testSourceSets.whenObjectAdded(testSourceSet -> {
-            val taskName = testSourceSet.getTaskName("test", null);
+            final String taskName;
+            {
+                val hasWordTest = WORD_TEST_REGEXP.matcher(testSourceSet.getName()).find();
+                if (hasWordTest) {
+                    taskName = testSourceSet.getTaskName(null, null);
+                } else {
+                    taskName = testSourceSet.getTaskName(null, "test");
+                }
+            }
+
             project.getTasks().register(taskName, Test.class, task -> {
+                task.setGroup(VERIFICATION_GROUP);
+                task.setDescription("Runs " + testSourceSet.getName() + " tests");
+
                 ConventionMapping conventionMapping = task.getConventionMapping();
-                conventionMapping.map("testClassesDirs", (Callable<FileCollection>) () ->
-                    testSourceSet.getOutput().getClassesDirs()
+                conventionMapping.map(
+                    "testClassesDirs",
+                    (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
                 );
-                conventionMapping.map("classpath", (Callable<FileCollection>)
-                    testSourceSet::getRuntimeClasspath
+                conventionMapping.map(
+                    "classpath",
+                    (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
                 );
                 if (IS_MODULARITY_SUPPORTED) {
                     configureTestTaskModularity(project, task);
                 }
             });
+
+            allTestsTask.configure(it -> it.dependsOn(taskName));
         });
     }
 
@@ -150,34 +177,6 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
         testTask.getModularity().getInferModulePath()
             .convention(javaPluginExtension.getModularity().getInferModulePath());
-    }
-
-
-    private static void configureKotlin(Project project) {
-        val isConfigured = new AtomicBoolean();
-        asList(
-            "kotlin",
-            "kotlin2js",
-            "kotlin-platform-common"
-        ).forEach(pluginId ->
-            project.getPluginManager().withPlugin(pluginId, __ -> {
-                if (isConfigured.compareAndSet(false, true)) {
-                    configureKotlinTarget(project);
-                }
-            })
-        );
-    }
-
-    private static void configureKotlinTarget(Project project) {
-        val kotlin = project.getExtensions().getByType(KotlinSingleTargetExtension.class);
-        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
-
-        val kotlinCompilations = kotlin.getTarget().getCompilations();
-        testSourceSets.all(testSourceSet -> {
-            kotlinCompilations.matching(it -> it.getName().equals(testSourceSet.getName())).all(kotlinCompilation -> {
-                kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME));
-            });
-        });
     }
 
 
@@ -231,3 +230,5 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 }
+
+

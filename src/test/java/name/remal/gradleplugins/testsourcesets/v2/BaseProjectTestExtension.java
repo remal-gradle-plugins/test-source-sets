@@ -12,11 +12,13 @@ import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
+import java.io.File;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Member;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
@@ -36,25 +38,29 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 @ExtendWith(BaseProjectTestExtension.class)
 public class BaseProjectTestExtension implements BeforeEachCallback, AfterEachCallback, ExecutionCondition {
 
-    private final Queue<Project> createdProjects = new LinkedBlockingQueue<>();
+    private final Queue<File> createdFiles = new LinkedBlockingQueue<>();
 
     private String dirPrefix = "";
 
     @SneakyThrows
-    protected Project newProject() {
-        val projectDir = createTempDirectory(dirPrefix).toFile();
+    protected final File newProjectDirectory() {
+        val projectDir = createTempDirectory(dirPrefix).toAbsolutePath().toFile();
+        createdFiles.add(projectDir);
+        return projectDir;
+    }
+
+    protected final Project newProject() {
+        val projectDir = newProjectDirectory();
         val project = ProjectBuilder.builder()
             .withProjectDir(projectDir)
             .withName(projectDir.getName())
             .build();
-
-        createdProjects.add(project);
-
         return project;
     }
 
+
     @Override
-    public void beforeEach(ExtensionContext context) {
+    public final void beforeEach(ExtensionContext context) {
         dirPrefix = Stream.of(
             context.getTestClass().map(Class::getName),
             context.getTestMethod().map(Member::getName)
@@ -65,20 +71,19 @@ public class BaseProjectTestExtension implements BeforeEachCallback, AfterEachCa
     }
 
     @Override
-    public void afterEach(ExtensionContext context) {
+    public final void afterEach(ExtensionContext context) {
         dirPrefix = "";
 
         while (true) {
-            val project = createdProjects.poll();
-            if (project == null) {
+            val file = createdFiles.poll();
+            if (file == null) {
                 break;
             }
 
             val isExceptionThrown = context.getExecutionException().isPresent();
             if (isExceptionThrown) {
-                val projectDir = project.getProjectDir();
-                if (!projectDir.delete()) {
-                    deleteDir(projectDir);
+                if (!file.delete()) {
+                    deleteDir(file);
                 }
             }
         }
@@ -94,7 +99,7 @@ public class BaseProjectTestExtension implements BeforeEachCallback, AfterEachCa
     }
 
     @Override
-    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+    public final ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
         val annotation = findAnnotation(context.getElement(), MinSupportedGradleVersion.class).orElse(null);
         if (annotation == null) {
             return enabled(format("@%s is not present", MinSupportedGradleVersion.class.getSimpleName()));
@@ -115,6 +120,17 @@ public class BaseProjectTestExtension implements BeforeEachCallback, AfterEachCa
                 minGradleVersion.getVersion()
             ));
         }
+    }
+
+
+    private static final String CORRESPONDING_KOTLIN_VERSION_PROPERTY = "corresponding-kotlin.version";
+
+    protected String getCorrespondingKotlinVersion() {
+        return Optional.ofNullable(System.getProperty(CORRESPONDING_KOTLIN_VERSION_PROPERTY))
+            .filter(it -> !it.isEmpty())
+            .orElseThrow(() -> new AssertionError(
+                CORRESPONDING_KOTLIN_VERSION_PROPERTY + " system property is not set or empty"
+            ));
     }
 
 }

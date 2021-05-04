@@ -58,11 +58,5 @@ allprojects {
                 'Kotlin Gradle plugin os the same version, as Kotlin that bundled in the current Gradle instance'
             )
         }
-
-
-        tasks.withType(PluginUnderTestMetadata) {
-            pluginClasspath.from = []
-            pluginClasspath.from(project.provider { tasks.jar.archiveFile })
-        }
     }
 }
