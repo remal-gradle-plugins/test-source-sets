@@ -8,7 +8,7 @@ A Gradle plugin that provides `testSourceSet` extension for creating new source 
 
 ```groovy
 testSourceSet {
-    integration
+  integration
 }
 ```
 
@@ -31,7 +31,7 @@ So, after defining `integration` test source set:
 
 ```groovy
 testSourceSet {
-    integration
+  integration
 }
 ```
 
@@ -45,3 +45,7 @@ testSourceSet {
 ## Kotlin specifics
 
 Internal members of `main` source set **are** accessible in all test source sets. The way it's done is described [here](https://youtrack.jetbrains.com/issue/KT-34901#focus=streamItem-27-3810442.0-0).
+
+# `name.remal.integration-tests.v2` plugin
+
+A Gradle plugin that applies `name.remal.test-source-sets.v2` plugin and creates `integration` test source set.
