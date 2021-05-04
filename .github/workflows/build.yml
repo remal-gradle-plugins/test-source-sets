@@ -97,7 +97,7 @@ jobs:
         echo "DISABLE_COMPILATION=true" >> "$GITHUB_ENV"
     - name: Build
       run: |
-        ./gradlew build -Pdisable-test=true
+        ./gradlew build -Pdisable-tests=true
     - name: Archive workspace
       run: |
         tar -cz -f "/tmp/workspace-${{github.run_id}}.tar.gz" `git ls-files -m -o`
