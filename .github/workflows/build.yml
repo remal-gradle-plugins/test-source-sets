@@ -241,7 +241,7 @@ jobs:
       uses: actions/github-script@v4
       with:
         script: |
-          const tagName = context.payload.ref.replace(/^\/refs\/tags\//, '')
+          const tagName = context.payload.ref.replace(/^refs\/tags\//, '')
           core.info('tagName=' + tagName)
           const result = {
             isVersion: !!tagName.match(/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-rc-[1-9]\d*)?$/),
