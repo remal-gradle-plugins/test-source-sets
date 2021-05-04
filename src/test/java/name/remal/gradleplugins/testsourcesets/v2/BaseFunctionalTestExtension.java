@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.gradle.api.Project.DEFAULT_BUILD_FILE;
+import static org.gradle.api.initialization.Settings.DEFAULT_SETTINGS_FILE;
 
 import java.io.File;
 import java.net.URI;
@@ -35,10 +36,12 @@ public class BaseFunctionalTestExtension extends BaseProjectTestExtension {
     protected final File projectDir = newProjectDirectory();
 
 
+    private final File settingsFile = new File(projectDir, DEFAULT_SETTINGS_FILE);
     private final File buildFile = new File(projectDir, DEFAULT_BUILD_FILE);
 
     private final AppliedPlugins appliedPlugins = new AppliedPlugins();
 
+    private final List<Object> settingsFileChunks = new ArrayList<>();
     private final List<Object> buildFileChunks = new ArrayList<>();
 
     {
@@ -51,6 +54,11 @@ public class BaseFunctionalTestExtension extends BaseProjectTestExtension {
 
     protected final void applyPlugin(String pluginId, String pluginVersion) {
         appliedPlugins.add(pluginId, pluginVersion);
+    }
+
+    @SneakyThrows
+    protected final void appendToSettingsFile(CharSequence... contentParts) {
+        settingsFileChunks.addAll(asList(contentParts));
     }
 
     @SneakyThrows
@@ -93,10 +101,16 @@ public class BaseFunctionalTestExtension extends BaseProjectTestExtension {
 
     @SneakyThrows
     protected final void assertBuildSuccessfully() {
+        createDirectories(requireNonNull(settingsFile.getParentFile()).toPath());
+        write(settingsFile.toPath(), settingsFileChunks.stream()
+            .map(Object::toString)
+            .collect(joining("\n"))
+            .getBytes(UTF_8)
+        );
+
         buildFileChunks.add("if (project.defaultTasks.isEmpty()) "
             + "project.defaultTasks(tasks.create('_defaultEmptyTask').name)"
         );
-
         createDirectories(requireNonNull(buildFile.getParentFile()).toPath());
         write(buildFile.toPath(), buildFileChunks.stream()
             .map(Object::toString)
