@@ -15,19 +15,36 @@ allprojects {
         }
 
 
+        ext['getCorrespondingKotlinVersion'] = rootProject.findProperty('getCorrespondingKotlinVersion') ?: {
+            Dependency apiDep = project.dependencies.create(
+                "name.remal.gradle-api:gradle-api:${property('gradle-api.version')}"
+            )
+            Configuration tempConf = configurations.detachedConfiguration(apiDep)
+            ResolvedDependency kotlinDep = tempConf.resolvedConfiguration
+                .lenientConfiguration
+                .allModuleDependencies
+                .find { it.moduleGroup == 'org.jetbrains.kotlin' }
+
+            return kotlinDep?.moduleVersion
+        }.memoize()
+
+        tasks.matching { it instanceof JavaForkOptions }.configureEach {
+            String correspondingKotlinVersion = getCorrespondingKotlinVersion()
+            if (correspondingKotlinVersion != null) {
+                onlyIf {
+                    systemProperty('corresponding-kotlin.version', correspondingKotlinVersion)
+                    return true
+                }
+            }
+        }
+
+
         configurations.create('correspondingKotlinPlugin') { Configuration conf ->
             conf.defaultDependencies { deps ->
-                Dependency apiDep = project.dependencies.create(
-                    "name.remal.gradle-api:gradle-api:${property('gradle-api.version')}"
-                )
-                Configuration tempConf = configurations.detachedConfiguration(apiDep)
-                ResolvedDependency kotlinDep = tempConf.resolvedConfiguration
-                    .lenientConfiguration
-                    .allModuleDependencies
-                    .find { it.moduleGroup == 'org.jetbrains.kotlin' }
-                if (kotlinDep != null) {
+                String correspondingKotlinVersion = getCorrespondingKotlinVersion()
+                if (correspondingKotlinVersion != null) {
                     Dependency kotlinPluginDep = project.dependencies.create(
-                        "${kotlinDep.moduleGroup}:kotlin-gradle-plugin:${kotlinDep.moduleVersion}"
+                        "org.jetbrains.kotlin:kotlin-gradle-plugin:${correspondingKotlinVersion}"
                     ) {
                         exclude group: 'commons-logging', module: 'commons-logging'
                     }
