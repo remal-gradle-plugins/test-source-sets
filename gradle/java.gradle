@@ -66,6 +66,22 @@ allprojects {
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         }
 
+        sourceSets.all { SourceSet sourceSet ->
+            configurations[sourceSet.compileClasspathConfigurationName].attributes { attrs ->
+                attrs.
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements, LibraryElements.JAR)
+                    )
+            }
+            configurations[sourceSet.runtimeClasspathConfigurationName].attributes { attrs ->
+                attrs.
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements, LibraryElements.JAR)
+                    )
+            }
+        }
 
         sourceSets.all { SourceSet sourceSet ->
             configurations[sourceSet.compileClasspathConfigurationName].attributes { attrs ->
@@ -111,8 +127,14 @@ allprojects {
 
         tasks.withType(Test) {
             useJUnitPlatform()
+            enableAssertions = true
 
             testLogging {
+                showExceptions = true
+                showCauses = true
+                showStackTraces = true
+                exceptionFormat = 'FULL'
+                stackTraceFilters('GROOVY')
                 events('FAILED')
             }
 
