@@ -11,6 +11,9 @@ allprojects {
             )
         }
         project.version = versionFromGitRef
+        if (project == rootProject) {
+            println "Version from Git tag: ${project.version}"
+        }
     }
 
     gradle.startParameter.showStacktrace = 'ALWAYS'
