@@ -1,15 +1,22 @@
 package name.remal.gradleplugins.testsourcesets.v2;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.val;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
@@ -180,6 +187,121 @@ class TestSourceSetsPluginTest extends BaseProjectTestExtension {
                 .contains(configurations.getByName(testSourceSet.getRuntimeOnlyConfigurationName())),
             testSourceSet.getRuntimeOnlyConfigurationName()
         );
+    }
+
+
+    @Nested
+    @DisplayName("Test tasks")
+    class CreatedTestTasks {
+
+        private final SourceSet integrationSourceSet;
+        private final org.gradle.api.tasks.testing.Test testTask;
+        private final org.gradle.api.tasks.testing.Test testIntegrationTask;
+
+        {
+            val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+            integrationSourceSet = testSourceSets.create("integration");
+
+            val testTasks = project.getTasks().withType(org.gradle.api.tasks.testing.Test.class);
+            testTask = testTasks.findByName("test");
+            testIntegrationTask = testTasks.findByName("integrationTest");
+        }
+
+        @Test
+        @DisplayName("Test task is created for every test-source-set")
+        void testTaskIsCreatedForEveryTestSourceSet() {
+            assertNotNull(testTask);
+            assertNotNull(testIntegrationTask);
+        }
+
+        @Nested
+        @DisplayName("allTests task")
+        class AllTestsTask {
+
+            private final Task allTestsTask = project.getTasks().findByName("allTests");
+
+            @Test
+            @DisplayName("'allTests' task is created")
+            void allTestsTaskIsCreated() {
+                assertNotNull(allTestsTask);
+            }
+
+            @Test
+            @DisplayName("'allTests' task depends on Test task of all test-source-set")
+            void allTestsTaskDependsOnTestTaskOfAllTestSourceSet() {
+                assertNotNull(allTestsTask);
+                assertNotNull(testTask);
+                assertTrue(
+                    allTestsTask.getDependsOn().contains(testTask.getName()),
+                    testTask.getName()
+                );
+                assertNotNull(testIntegrationTask);
+                assertTrue(
+                    allTestsTask.getDependsOn().contains(testIntegrationTask.getName()),
+                    testIntegrationTask.getName()
+                );
+            }
+
+        }
+
+        @Test
+        @DisplayName("created Test task don't have repeated word 'test' in its name")
+        void createdTestTaskDontHaveRepeatedWordTestInItsName() {
+            val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+            asList(
+                "functionalTest",
+                "new-functional-test"
+            ).forEach(sourceSetName -> {
+                testSourceSets.create(sourceSetName);
+                val functionTestTask = project.getTasks()
+                    .withType(org.gradle.api.tasks.testing.Test.class).stream()
+                    .filter(it -> it.getName().toLowerCase().contains("functional"))
+                    .findAny()
+                    .orElse(null);
+                assertNotNull(functionTestTask, sourceSetName);
+                assertEquals(
+                    1,
+                    StringGroovyMethods.count(functionTestTask.getName().toLowerCase(), "test"),
+                    sourceSetName
+                );
+            });
+        }
+
+        @Test
+        @DisplayName("created Test task has correct testClassesDirs")
+        void createdTestTaskHasCorrectTestClassesDirs() {
+            assertNotNull(testIntegrationTask);
+            assertSame(
+                testIntegrationTask.getTestClassesDirs(),
+                integrationSourceSet.getOutput().getClassesDirs()
+            );
+        }
+
+        @Test
+        @DisplayName("created Test task has correct classpath")
+        void createdTestTaskHasCorrectClasspath() {
+            assertNotNull(testIntegrationTask);
+            assertSame(
+                testIntegrationTask.getClasspath(),
+                integrationSourceSet.getRuntimeClasspath()
+            );
+        }
+
+        @Test
+        @DisplayName("created Test task has correct modularity settings (Gradle >= 6.4)")
+        @MinSupportedGradleVersion("6.4")
+        void createdTestTaskHasCorrectModularitySettings() {
+            JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
+            assertNotNull(testIntegrationTask);
+
+            javaPluginExtension.getModularity().getInferModulePath().set(true);
+            assertTrue(testIntegrationTask.getModularity().getInferModulePath().get());
+
+            javaPluginExtension.getModularity().getInferModulePath().set(false);
+            assertFalse(testIntegrationTask.getModularity().getInferModulePath().get());
+        }
+
+
     }
 
 
