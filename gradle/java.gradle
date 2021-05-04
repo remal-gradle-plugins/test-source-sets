@@ -100,7 +100,6 @@ allprojects {
             }
         }
 
-
         tasks.withType(JavaCompile) {
             options.with {
                 it.fork = false
