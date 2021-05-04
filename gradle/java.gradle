@@ -67,6 +67,24 @@ allprojects {
         }
 
 
+        sourceSets.all { SourceSet sourceSet ->
+            configurations[sourceSet.compileClasspathConfigurationName].attributes { attrs ->
+                attrs.
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements, LibraryElements.JAR)
+                    )
+            }
+            configurations[sourceSet.runtimeClasspathConfigurationName].attributes { attrs ->
+                attrs.
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements, LibraryElements.JAR)
+                    )
+            }
+        }
+
+
         tasks.withType(JavaCompile) {
             options.with {
                 it.fork = false
