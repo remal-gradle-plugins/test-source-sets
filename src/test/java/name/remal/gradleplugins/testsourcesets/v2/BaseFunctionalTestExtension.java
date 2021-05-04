@@ -35,16 +35,15 @@ public class BaseFunctionalTestExtension extends BaseProjectTestExtension {
 
     protected final File projectDir = newProjectDirectory();
 
-
     private final File settingsFile = new File(projectDir, DEFAULT_SETTINGS_FILE);
-    private final File buildFile = new File(projectDir, DEFAULT_BUILD_FILE);
-
-    private final AppliedPlugins appliedPlugins = new AppliedPlugins();
-
     private final List<Object> settingsFileChunks = new ArrayList<>();
+
+    private final File buildFile = new File(projectDir, DEFAULT_BUILD_FILE);
+    private final AppliedPlugins appliedPlugins = new AppliedPlugins();
     private final List<Object> buildFileChunks = new ArrayList<>();
 
     {
+        settingsFileChunks.add("rootProject.name = '" + projectDir.getName() + "'");
         buildFileChunks.add(appliedPlugins);
     }
 
