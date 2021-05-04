@@ -109,8 +109,14 @@ allprojects {
 
         tasks.withType(Test) {
             useJUnitPlatform()
+            enableAssertions = true
 
             testLogging {
+                showExceptions = true
+                showCauses = true
+                showStackTraces = true
+                exceptionFormat = 'FULL'
+                stackTraceFilters('GROOVY')
                 events('FAILED')
             }
 
