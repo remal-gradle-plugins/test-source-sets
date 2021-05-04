@@ -301,6 +301,6 @@ jobs:
     - name: Unarchive workspace
       run: |
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
-    - name: Publish to Gradle plugin portal
+    - name: Publish to Gradle Plugin Portal
       run: |
         ./gradlew publishPlugins "-Pgradle.publish.key=${{secrets.GRADLE_PLUGINS_PORTAL_KEY}}" "-Pgradle.publish.secret=${{secrets.GRADLE_PLUGINS_PORTAL_SECRET}}"
