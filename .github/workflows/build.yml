@@ -301,9 +301,6 @@ jobs:
     - name: Unarchive workspace
       run: |
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
-    - name: Execute tests
-      run: |
-        ./gradlew allTests "-Pgradle-api.version=${{matrix.gradle-version}}"
     - name: Publish to Gradle plugin portal
       run: |
         ./gradlew publishPlugins "-Pgradle.publish.key=${{secrets.GRADLE_PLUGINS_PORTAL_KEY}}" "-Pgradle.publish.secret=${{secrets.GRADLE_PLUGINS_PORTAL_SECRET}}"
