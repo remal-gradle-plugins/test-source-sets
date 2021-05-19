@@ -1,5 +1,6 @@
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import org.gradle.api.internal.tasks.compile.HasCompileOptions
 
 allprojects {
     pluginManager.withPlugin('java') {
@@ -83,8 +84,8 @@ allprojects {
             }
         }
 
-        tasks.withType(JavaCompile) {
-            options.with {
+        tasks.matching({ it instanceof HasCompileOptions }).configureEach { HasCompileOptions task ->
+            task.options.with {
                 it.fork = false
                 it.encoding = 'UTF-8'
                 it.deprecation = true
