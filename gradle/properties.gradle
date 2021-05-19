@@ -64,7 +64,7 @@ allprojects {
         ext['majorVersion'] = currentVersion.replaceFirst(/^(\d+).*/, '$1')
     }
 
-    ext['baseJavaPackage'] = "${rootProject.group}.${rootProject.name}.v${ext['majorVersion']}${project.path}"
+    ext['baseJavaPackage'] = "${rootProject.group}.${rootProject.name}${project.path}"
         .replace('-', '')
         .replace(':', '.')
         .replaceFirst(/\.+$/, '')

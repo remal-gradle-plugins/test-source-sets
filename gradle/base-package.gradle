@@ -1,0 +1,19 @@
+allprojects {
+    tasks.withType(AbstractCompile) {
+        doLast {
+            String baseJavaPackage = project.property('baseJavaPackage').toString()
+            String classFilePrefix = baseJavaPackage.replace('.', '/')
+            project.files(it.destinationDirectory).asFileTree
+                .matching { include('**/*.class') }
+                .matching { exclude("${classFilePrefix}/**/*.class") }
+                .visit { FileVisitDetails details ->
+                    if (details.directory) return
+                    String relativePath = details.relativePath.toString()
+                    String className = relativePath.replaceFirst(/\.class$/, '').replace('/', '.')
+                    throw new GradleException(
+                        "Class name doesn't start with base Java package '${baseJavaPackage}.': ${className}"
+                    )
+                }
+        }
+    }
+}
