@@ -9,6 +9,12 @@ allprojects {
                 .collect { it.trim().toLowerCase() }
                 .findAll { !it.isEmpty() }
                 .findAll { it != 'gradle' && it != 'plugin' }
+
+            it.mavenCoordinates.with {
+                it.groupId = project.group.toString()
+                it.artifactId = project.name.toString()
+                it.version = project.version.toString()
+            }
         }
     }
 }
