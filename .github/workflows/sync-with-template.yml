@@ -15,7 +15,7 @@ defaults:
 
 env:
   PUSH_BACK_TOKEN: ${{ secrets.PUSH_BACK_TOKEN }}
-  ACTIONS_STEP_DEBUG: ${{ github.event.inputs.min }}
+  ACTIONS_STEP_DEBUG: ${{ github.event.inputs.debug }}
 
 jobs:
   sync-with-template:
