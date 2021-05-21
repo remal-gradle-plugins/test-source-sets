@@ -1,11 +1,11 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import static java.lang.System.identityHashCode;
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static name.remal.gradleplugins.testsourcesets.v2.TestSourceSetsKotlinConfigurer.configureKotlinTestSourceSets;
+import static name.remal.gradleplugins.testsourcesets.TestSourceSetsKotlinConfigurer.configureKotlinTestSourceSets;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;

@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;

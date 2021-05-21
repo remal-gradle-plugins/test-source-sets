@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2
+package name.remal.gradleplugins.testsourcesets
 
 import static java.util.Arrays.asList
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME

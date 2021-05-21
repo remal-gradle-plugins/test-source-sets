@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.tasks.SourceSet;

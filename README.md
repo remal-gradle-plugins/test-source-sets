@@ -1,4 +1,4 @@
-# `name.remal.test-source-sets.v2` plugin
+# `name.remal.test-source-sets` plugin
 
 A Gradle plugin that provides `testSourceSet` extension for creating new source sets for testing. For all created source sets a [Test](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/Test.html) task is created. All dependencies are inherited from `test` source set.
 
@@ -46,6 +46,6 @@ testSourceSet {
 
 Internal members of `main` source set **are** accessible in all test source sets. The way it's done is described [here](https://youtrack.jetbrains.com/issue/KT-34901#focus=streamItem-27-3810442.0-0).
 
-# `name.remal.integration-tests.v2` plugin
+# `name.remal.integration-tests` plugin
 
-A Gradle plugin that applies `name.remal.test-source-sets.v2` plugin and creates `integration` test source set.
+A Gradle plugin that applies `name.remal.test-source-sets` plugin and creates `integration` test source set.

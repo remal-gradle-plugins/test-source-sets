@@ -43,15 +43,15 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        'name.remal.test-source-sets.v2' {
-            id = 'name.remal.test-source-sets.v2'
-            implementationClass = 'name.remal.gradleplugins.testsourcesets.v2.TestSourceSetsPlugin'
+        'name.remal.test-source-sets' {
+            id = 'name.remal.test-source-sets'
+            implementationClass = 'name.remal.gradleplugins.testsourcesets.TestSourceSetsPlugin'
             displayName = 'A plugin that creates `testSourceSets` extension'
             description = property('repository-description')
         }
-        'name.remal.integration-tests.v2' {
-            id = 'name.remal.integration-tests.v2'
-            implementationClass = 'name.remal.gradleplugins.testsourcesets.v2.IntegrationTestsPlugin'
+        'name.remal.integration-tests' {
+            id = 'name.remal.integration-tests'
+            implementationClass = 'name.remal.gradleplugins.testsourcesets.IntegrationTestsPlugin'
             displayName = 'A plugin that creates `integration` source set for integration tests'
             description = displayName
         }

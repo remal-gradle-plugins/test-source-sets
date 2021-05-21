@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
