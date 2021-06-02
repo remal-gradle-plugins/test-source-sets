@@ -23,6 +23,7 @@ class TestSourceSetsPluginFunctionalTest extends BaseFunctionalTestExtension {
 
     @Test
     @DisplayName("Kotlin build with internal visibility performs successfully")
+    @MinSupportedGradleVersion("6.1")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         applyPlugin("org.jetbrains.kotlin.jvm", getCorrespondingKotlinVersion());
         appendToBuildFile(
