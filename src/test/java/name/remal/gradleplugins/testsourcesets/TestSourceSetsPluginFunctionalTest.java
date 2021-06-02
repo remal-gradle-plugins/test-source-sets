@@ -1,6 +1,6 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
-import static name.remal.gradleplugins.testsourcesets.v2.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
+import static name.remal.gradleplugins.testsourcesets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class TestSourceSetsPluginFunctionalTest extends BaseFunctionalTestExtension {
 
     {
-        applyPlugin("name.remal.test-source-sets.v2");
+        applyPlugin("name.remal.test-source-sets");
         appendToBuildFile(
             "testSourceSets { additional }",
             "defaultTasks('" + ALL_TESTS_TASK_NAME + "')"
@@ -23,6 +23,7 @@ class TestSourceSetsPluginFunctionalTest extends BaseFunctionalTestExtension {
 
     @Test
     @DisplayName("Kotlin build with internal visibility performs successfully")
+    @MinSupportedGradleVersion("6.1")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         applyPlugin("org.jetbrains.kotlin.jvm", getCorrespondingKotlinVersion());
         appendToBuildFile(

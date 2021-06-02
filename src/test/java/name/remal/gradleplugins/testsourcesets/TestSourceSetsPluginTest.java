@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -315,6 +315,7 @@ class TestSourceSetsPluginTest extends BaseProjectTestExtension {
 
         @Test
         @DisplayName("all test-source-sets are associated with 'main' compilation")
+        @MinSupportedGradleVersion("6.1")
         void all_test_source_sets_are_associated_with_main_compilation() {
             val kotlin = project.getExtensions().getByType(KotlinSingleTargetExtension.class);
             val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);

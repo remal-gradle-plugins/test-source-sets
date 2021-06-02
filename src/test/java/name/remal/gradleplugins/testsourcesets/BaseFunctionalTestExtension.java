@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2;
+package name.remal.gradleplugins.testsourcesets;
 
 import static java.lang.String.format;
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;

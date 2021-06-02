@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets.v2
+package name.remal.gradleplugins.testsourcesets
 
 import static java.util.Arrays.asList
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
@@ -6,9 +6,14 @@ import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import java.util.concurrent.atomic.AtomicBoolean
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 abstract class TestSourceSetsKotlinConfigurer {
+
+    private static final Logger logger = Logging.getLogger(TestSourceSetsKotlinConfigurer)
 
     static void configureKotlinTestSourceSets(Project project) {
         AtomicBoolean isConfigured = new AtomicBoolean()
@@ -29,10 +34,18 @@ abstract class TestSourceSetsKotlinConfigurer {
     private static void configureKotlinTarget(Project project) {
         TestSourceSetContainer testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class)
         def kotlin = project.getExtensions().getByName("kotlin")
-        def kotlinCompilations = kotlin.target.compilations
+        NamedDomainObjectContainer kotlinCompilations = kotlin.target.compilations
         testSourceSets.all { testSourceSet ->
             kotlinCompilations.matching(it -> it.getName().equals(testSourceSet.getName())).all { kotlinCompilation ->
-                kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME))
+                try {
+                    kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME))
+                } catch (MissingMethodException e) {
+                    if (e.method == 'associateWith') {
+                        logger.debug(e.toString(), e)
+                    } else {
+                        throw e
+                    }
+                }
             }
         }
     }
