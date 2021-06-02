@@ -44,7 +44,7 @@ testSourceSet {
 
 ## Kotlin specifics
 
-Internal members of `main` source set **are** accessible in all test source sets. The way it's done is described [here](https://youtrack.jetbrains.com/issue/KT-34901#focus=streamItem-27-3810442.0-0).
+Internal members of `main` source set **are** accessible in all test source sets. It works for Kotlin Gradle plugin >=1.3.60. The way it's done is described [here](https://youtrack.jetbrains.com/issue/KT-34901#focus=streamItem-27-3810442.0-0).
 
 # `name.remal.integration-tests` plugin
 
