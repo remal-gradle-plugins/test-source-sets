@@ -8,8 +8,12 @@ import groovy.transform.TypeCheckingMode
 import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 abstract class TestSourceSetsKotlinConfigurer {
+
+    private static final Logger logger = Logging.getLogger(TestSourceSetsKotlinConfigurer)
 
     static void configureKotlinTestSourceSets(Project project) {
         AtomicBoolean isConfigured = new AtomicBoolean()
@@ -33,7 +37,15 @@ abstract class TestSourceSetsKotlinConfigurer {
         NamedDomainObjectContainer kotlinCompilations = kotlin.target.compilations
         testSourceSets.all { testSourceSet ->
             kotlinCompilations.matching(it -> it.getName().equals(testSourceSet.getName())).all { kotlinCompilation ->
-                kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME))
+                try {
+                    kotlinCompilation.associateWith(kotlinCompilations.getByName(MAIN_SOURCE_SET_NAME))
+                } catch (MissingMethodException e) {
+                    if (e.method == 'associateWith') {
+                        logger.debug(e.toString(), e)
+                    } else {
+                        throw e
+                    }
+                }
             }
         }
     }
