@@ -42,6 +42,9 @@ jobs:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/wrapper/**', '**/*.gradle')}}
         path: |
           ~/.gradle
+    - name: Validate Gradle Wrapper
+      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+      uses: gradle/wrapper-validation-action@v1
     - name: Setup Java 11
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
       uses: actions/setup-java@v2
@@ -67,8 +70,6 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 2
-    - name: Validate Gradle Wrapper
-      uses: gradle/wrapper-validation-action@v1
     - name: Cache
       uses: actions/cache@v2
       with:
