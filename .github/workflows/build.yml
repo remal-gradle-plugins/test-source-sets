@@ -67,6 +67,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 2
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
     - name: Cache
       uses: actions/cache@v2
       with:
