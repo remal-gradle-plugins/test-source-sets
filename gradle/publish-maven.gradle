@@ -7,11 +7,6 @@ allprojects {
         apply plugin: 'java-library'
         apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
-        java {
-            withJavadocJar()
-            withSourcesJar()
-        }
-
         publishing.publications.withType(MavenPublication) {
             versionMapping {
                 usage('java-api') { fromResolutionOf('compileClasspath') }
@@ -53,6 +48,11 @@ allprojects {
 
         afterEvaluate {
             if (!pluginManager.hasPlugin('com.gradle.plugin-publish')) {
+                java {
+                    withJavadocJar()
+                    withSourcesJar()
+                }
+
                 publishing.publications.maven(MavenPublication) {
                     it.groupId = project.group.toString()
                     it.artifactId = project.name.toString()
