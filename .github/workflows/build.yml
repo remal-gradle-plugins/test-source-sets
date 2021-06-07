@@ -356,4 +356,4 @@ jobs:
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
     - name: Publish to Maven Central
       run: |
-        ./gradlew publishToOssrh closeAndReleaseOssrhStagingRepository "-PossrhUsername=${{secrets.OSS_USER}}" "-PossrhPassword=${{secrets.OSS_PASSWORD}}" "-Psigning.key=${{secrets.SIGNING_SECRET_KEY_RING}}" "-Psigning.keyId=${{secrets.SIGNING_KEY_ID}}" "-Psigning.password=${{secrets.SIGNING_PASSWORD}}"
+        ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository "-PsonatypeUsername=${{secrets.OSS_USER}}" "-PsonatypePassword=${{secrets.OSS_PASSWORD}}" "-Psigning.key=${{secrets.SIGNING_SECRET_KEY_RING}}" "-Psigning.keyId=${{secrets.SIGNING_KEY_ID}}" "-Psigning.password=${{secrets.SIGNING_PASSWORD}}"

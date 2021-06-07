@@ -5,7 +5,9 @@ allprojects {
 
     pluginManager.withPlugin('io.github.gradle-nexus.publish-plugin') {
         nexusPublishing {
-            repositories.create('ossrh')
+            repositories {
+                sonatype()
+            }
         }
     }
 }
