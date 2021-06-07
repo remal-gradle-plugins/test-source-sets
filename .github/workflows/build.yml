@@ -69,7 +69,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: recursive
-        fetch-depth: 2
+        fetch-depth: 1
     - name: Cache
       uses: actions/cache@v2
       with:
@@ -86,15 +86,25 @@ jobs:
       uses: remal-github-actions/retrieve-repository-info@v1
     - name: Set repository info environment variables
       env:
+        REPOSITORY_NAME: ${{fromJSON(steps.repository-info.outputs.result).name}}
+        REPOSITORY_FULL_NAME: ${{fromJSON(steps.repository-info.outputs.result).fullName}}
         REPOSITORY_HTML_URL: ${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}
         REPOSITORY_DESCRIPTION: ${{fromJSON(steps.repository-info.outputs.result).description}}
         REPOSITORY_TOPICS: ${{fromJSON(steps.repository-info.outputs.result).topicsString}}
         REPOSITORY_IS_TEMPLATE: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
+        REPOSITORY_OWNER_NAME: ${{fromJSON(steps.repository-info.outputs.result).owner.name}}
+        REPOSITORY_LICENSE_NAME: ${{fromJSON(steps.repository-info.outputs.result).license.name}}
+        REPOSITORY_LICENSE_HTML_URL: ${{fromJSON(steps.repository-info.outputs.result).license.htmlUrl}}
       run: |
+        echo "REPOSITORY_NAME=$REPOSITORY_NAME" >> "$GITHUB_ENV"
+        echo "REPOSITORY_FULL_NAME=$REPOSITORY_FULL_NAME" >> "$GITHUB_ENV"
         echo "REPOSITORY_HTML_URL=$REPOSITORY_HTML_URL" >> "$GITHUB_ENV"
         echo "REPOSITORY_DESCRIPTION=$REPOSITORY_DESCRIPTION" >> "$GITHUB_ENV"
         echo "REPOSITORY_TOPICS=$REPOSITORY_TOPICS" >> "$GITHUB_ENV"
         echo "REPOSITORY_IS_TEMPLATE=$REPOSITORY_IS_TEMPLATE" >> "$GITHUB_ENV"
+        echo "REPOSITORY_OWNER_NAME=$REPOSITORY_OWNER_NAME" >> "$GITHUB_ENV"
+        echo "REPOSITORY_LICENSE_NAME=$REPOSITORY_LICENSE_NAME" >> "$GITHUB_ENV"
+        echo "REPOSITORY_LICENSE_HTML_URL=$REPOSITORY_LICENSE_HTML_URL" >> "$GITHUB_ENV"
     - name: Compile classes
       run: |
         ./gradlew allClasses
@@ -283,7 +293,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: recursive
-        fetch-depth: 2
+        fetch-depth: 1
     - name: Cache
       uses: actions/cache@v2
       with:
@@ -307,3 +317,42 @@ jobs:
     - name: Publish to Gradle Plugin Portal
       run: |
         ./gradlew publishPlugins "-Pgradle.publish.key=${{secrets.GRADLE_PLUGINS_PORTAL_KEY}}" "-Pgradle.publish.secret=${{secrets.GRADLE_PLUGINS_PORTAL_SECRET}}"
+
+  publish-to-maven-central:
+    needs:
+    #- evaluate-publish-conditions
+    - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DISABLE_COMPILATION: 'true'
+      DISABLE_VERIFICATION: 'true'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 1
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        path: |
+          ~/.gradle
+    - name: Setup Java 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: zulu
+    - name: Download workspace archive
+      id: download-workspace
+      uses: actions/download-artifact@v2
+      with:
+        name: workspace
+        path: /tmp
+    - name: Unarchive workspace
+      run: |
+        tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Publish to Maven Central
+      run: |
+        ./gradlew publishMavenPublicationToOssrhRepository "-Possrh.publish.username=${{secrets.OSS_USER}}" "-Possrh.publish.password=${{secrets.OSS_PASSWORD}}" "-Psigning.key=${{secrets.SIGNING_SECRET_KEY_RING}}" "-Psigning.keyId=${{secrets.SIGNING_KEY_ID}}" "-Psigning.password=${{secrets.SIGNING_PASSWORD}}"

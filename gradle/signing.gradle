@@ -1,0 +1,15 @@
+allprojects {
+    if (!findProperty('signing.key')?.toString()?.isEmpty()) {
+        apply plugin: 'signing'
+    }
+
+    pluginManager.withPlugin('signing') {
+        signing {
+            useInMemoryPgpKeys(
+                findProperty('signing.keyId')?.toString(),
+                findProperty('signing.key')?.toString(),
+                findProperty('signing.password')?.toString()
+            )
+        }
+    }
+}

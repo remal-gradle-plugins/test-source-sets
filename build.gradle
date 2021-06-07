@@ -16,7 +16,8 @@ buildscript {
 
 allprojects {
     group = "name.remal.gradle-plugins.${rootProject.name}"
-    version = '2-SNAPSHOT'
+    //version = '2-SNAPSHOT'
+    version = '2'
 }
 
 apply from: 'gradle/properties.gradle'
@@ -27,7 +28,9 @@ apply from: 'gradle/groovy.gradle'
 apply from: 'gradle/checkstyle.gradle'
 apply from: 'gradle/gradle-plugin.gradle'
 apply from: 'gradle/base-package.gradle'
+apply from: 'gradle/publish-java.gradle'
 apply from: 'gradle/publish-gradle-plugin.gradle'
+apply from: 'gradle/signing.gradle'
 apply from: 'gradle/ide.gradle'
 apply from: 'gradle/renovate.gradle'
 
@@ -54,6 +57,26 @@ gradlePlugin {
             implementationClass = 'name.remal.gradleplugins.testsourcesets.IntegrationTestsPlugin'
             displayName = 'A plugin that creates `integration` source set for integration tests'
             description = displayName
+        }
+    }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+apply plugin: 'maven-publish'
+
+allprojects {
+    pluginManager.withPlugin('maven-publish') {
+        publishing.publications.withType(MavenPublication) {
+            pom {
+                developers {
+                    developer {
+                        name = 'Semyon Levin'
+                        email = 'levin.semen@gmail.com'
+                        id = email
+                    }
+                }
+            }
         }
     }
 }

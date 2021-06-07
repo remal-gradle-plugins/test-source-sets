@@ -49,10 +49,15 @@ allprojects {
     ext['disable-verification'] = getCiProperty('disable-verification', 'false')
     ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
 
+    ext['repository-name'] = getCiProperty('repository-name', '', true)
+    ext['repository-full-name'] = getCiProperty('repository-full-name', '', true)
     ext['repository-html-url'] = getCiProperty('repository-html-url', '', true)
     ext['repository-description'] = getCiProperty('repository-description', '', true)
     ext['repository-topics'] = getCiProperty('repository-topics', '', true)
     ext['repository-is-template'] = getCiProperty('repository-is-template', '', true)
+    ext['repository-owner-name'] = getCiProperty('repository-owner-name', '', true)
+    ext['repository-license-name'] = getCiProperty('repository-license-name', '', true)
+    ext['repository-license-html-url'] = getCiProperty('repository-license-html-url', '', true)
 
 
     File rootProjectDir = file(rootDir)
