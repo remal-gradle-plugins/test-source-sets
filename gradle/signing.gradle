@@ -1,5 +1,5 @@
 allprojects {
-    if (!findProperty('signing.key')?.toString()?.isEmpty()) {
+    if (hasProperty('signing.key') && !property('signing.key').toString().isEmpty()) {
         apply plugin: 'signing'
     }
 

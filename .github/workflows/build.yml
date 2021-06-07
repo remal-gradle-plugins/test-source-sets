@@ -320,8 +320,7 @@ jobs:
 
   publish-to-maven-central:
     needs:
-    #- evaluate-publish-conditions
-    - build
+    - evaluate-publish-conditions
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -355,4 +354,4 @@ jobs:
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
     - name: Publish to Maven Central
       run: |
-        ./gradlew publishMavenPublicationToOssrhRepository "-Possrh.publish.username=${{secrets.OSS_USER}}" "-Possrh.publish.password=${{secrets.OSS_PASSWORD}}" "-Psigning.key=${{secrets.SIGNING_SECRET_KEY_RING}}" "-Psigning.keyId=${{secrets.SIGNING_KEY_ID}}" "-Psigning.password=${{secrets.SIGNING_PASSWORD}}"
+        ./gradlew publishToOssrh closeAndReleaseOssrhStagingRepository "-PossrhUsername=${{secrets.OSS_USER}}" "-PossrhPassword=${{secrets.OSS_PASSWORD}}" "-Psigning.key=${{secrets.SIGNING_SECRET_KEY_RING}}" "-Psigning.keyId=${{secrets.SIGNING_KEY_ID}}" "-Psigning.password=${{secrets.SIGNING_PASSWORD}}"

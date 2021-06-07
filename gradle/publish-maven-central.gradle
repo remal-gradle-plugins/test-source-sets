@@ -1,0 +1,11 @@
+allprojects {
+    pluginManager.withPlugin('maven-publish') {
+        rootProject.apply plugin: 'io.github.gradle-nexus.publish-plugin'
+    }
+
+    pluginManager.withPlugin('io.github.gradle-nexus.publish-plugin') {
+        nexusPublishing {
+            repositories.create('ossrh')
+        }
+    }
+}
