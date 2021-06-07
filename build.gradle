@@ -15,7 +15,7 @@ buildscript {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 allprojects {
-    group = 'name.remal.gradle-plugins'
+    group = "name.remal.gradle-plugins.${rootProject.name}"
     version = '2-SNAPSHOT'
 }
 
