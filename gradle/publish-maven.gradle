@@ -41,6 +41,13 @@ allprojects {
                         url = property('repository-license-html-url')
                     }
                 }
+                developers {
+                    developer {
+                        name = 'Semyon Levin'
+                        email = 'levin.semen@gmail.com'
+                        id = email
+                    }
+                }
             }
         }
 

@@ -85,7 +85,6 @@ jobs:
       uses: remal-github-actions/retrieve-repository-info@v1
     - name: Set repository info environment variables
       env:
-        INFO: ${{steps.repository-info.outputs.result}}
         REPOSITORY_NAME: ${{fromJSON(steps.repository-info.outputs.result).name}}
         REPOSITORY_FULL_NAME: ${{fromJSON(steps.repository-info.outputs.result).fullName}}
         REPOSITORY_HTML_URL: ${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}
@@ -322,7 +321,7 @@ jobs:
     needs:
     - evaluate-publish-conditions
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       DISABLE_COMPILATION: 'true'
       DISABLE_VERIFICATION: 'true'
