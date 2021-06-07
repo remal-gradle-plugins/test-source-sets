@@ -175,6 +175,9 @@ jobs:
     - name: Unarchive workspace
       run: |
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Download dependencies
+      run: |
+        ./gradlew downloadDependencies "-Pgradle-api.version=${{matrix.gradle-version}}"
     - name: Execute tests
       run: |
         ./gradlew allTests "-Pgradle-api.version=${{matrix.gradle-version}}"
