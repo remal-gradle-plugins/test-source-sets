@@ -63,23 +63,3 @@ gradlePlugin {
         }
     }
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-apply plugin: 'maven-publish'
-
-allprojects {
-    pluginManager.withPlugin('maven-publish') {
-        publishing.publications.withType(MavenPublication) {
-            pom {
-                developers {
-                    developer {
-                        name = 'Semyon Levin'
-                        email = 'levin.semen@gmail.com'
-                        id = email
-                    }
-                }
-            }
-        }
-    }
-}
