@@ -35,6 +35,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
     - name: Cache
       id: cache
       uses: actions/cache@v2
@@ -42,9 +44,6 @@ jobs:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/wrapper/**', '**/*.gradle')}}
         path: |
           ~/.gradle
-    - name: Validate Gradle Wrapper
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
-      uses: gradle/wrapper-validation-action@v1
     - name: Setup Java 11
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
       uses: actions/setup-java@v2
@@ -86,6 +85,7 @@ jobs:
       uses: remal-github-actions/retrieve-repository-info@v1
     - name: Set repository info environment variables
       env:
+        INFO: ${{steps.repository-info.outputs.result}}
         REPOSITORY_NAME: ${{fromJSON(steps.repository-info.outputs.result).name}}
         REPOSITORY_FULL_NAME: ${{fromJSON(steps.repository-info.outputs.result).fullName}}
         REPOSITORY_HTML_URL: ${{fromJSON(steps.repository-info.outputs.result).htmlUrl}}
