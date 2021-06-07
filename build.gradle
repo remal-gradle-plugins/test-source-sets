@@ -17,8 +17,7 @@ buildscript {
 
 allprojects {
     group = "name.remal.gradle-plugins.${rootProject.name}"
-    //version = '2-SNAPSHOT'
-    version = '2'
+    version = '2-SNAPSHOT'
 }
 
 apply from: 'gradle/properties.gradle'
@@ -30,7 +29,6 @@ apply from: 'gradle/groovy.gradle'
 apply from: 'gradle/checkstyle.gradle'
 apply from: 'gradle/gradle-plugin.gradle'
 apply from: 'gradle/base-package.gradle'
-apply from: 'gradle/publish-java.gradle'
 apply from: 'gradle/publish-gradle-plugin.gradle'
 apply from: 'gradle/publish-maven.gradle'
 apply from: 'gradle/publish-maven-bom.gradle'
