@@ -1,5 +1,6 @@
 allprojects {
     pluginManager.withPlugin('maven-publish') {
+        rootProject.evaluationDependsOnChildren()
         rootProject.apply plugin: 'io.github.gradle-nexus.publish-plugin'
     }
 
