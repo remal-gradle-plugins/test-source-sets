@@ -33,6 +33,12 @@ allprojects {
             }
         }
 
+        configurations.create('compileOnlyAll') { Configuration conf ->
+            sourceSets.all { SourceSet sourceSet ->
+                configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
+            }
+        }
+
         configurations.create('optional') { Configuration conf ->
             sourceSets.all { SourceSet sourceSet ->
                 if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
@@ -51,8 +57,8 @@ allprojects {
         }
 
         dependencies {
-            compileOnly 'com.google.code.findbugs:jsr305'
-            compileOnly 'org.jetbrains:annotations'
+            compileOnlyAll 'com.google.code.findbugs:jsr305'
+            compileOnlyAll 'org.jetbrains:annotations'
 
             apt 'org.projectlombok:lombok'
 
@@ -61,8 +67,6 @@ allprojects {
             testImplementation 'org.junit.jupiter:junit-jupiter-params'
             testImplementation 'org.mockito:mockito-junit-jupiter'
             testImplementation 'org.mockito:mockito-inline'
-            testImplementation 'com.google.code.findbugs:jsr305'
-            testImplementation 'org.jetbrains:annotations'
 
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         }
