@@ -1,0 +1,12 @@
+allprojects {
+    pluginManager.withPlugin('name.remal.classes-relocation') {
+        dependencies {
+            excludeFromForcedClassesRelocation 'com.google.code.findbugs:jsr305'
+            excludeFromForcedClassesRelocation 'org.jetbrains:annotations'
+        }
+
+        classesRelocation {
+            relocatedClassesPackageName = "${project.baseJavaPackage}.internal._relocated"
+        }
+    }
+}
