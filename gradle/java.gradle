@@ -56,11 +56,20 @@ allprojects {
             }
         }
 
+        configurations.create('annotationProcessorAll') { Configuration conf ->
+            sourceSets.all { SourceSet sourceSet ->
+                configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
+            }
+        }
+
         dependencies {
             compileOnlyAll 'com.google.code.findbugs:jsr305'
             compileOnlyAll 'org.jetbrains:annotations'
 
             apt 'org.projectlombok:lombok'
+
+            annotationProcessorAll 'com.google.auto.service:auto-service'
+            compileOnlyAll 'com.google.auto.service:auto-service-annotations'
 
 
             testImplementation 'org.junit.jupiter:junit-jupiter-api'
