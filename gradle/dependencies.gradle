@@ -16,8 +16,6 @@ allprojects {
 
                 // Annotation processing
                 'org.projectlombok:lombok:1.18.20',
-                'com.google.auto.service:auto-service:1.0',
-                'com.google.auto.service:auto-service-annotations:1.0',
 
                 // Compile
                 "name.remal.gradle-api:local-groovy:${property('gradle-api.version')}",
