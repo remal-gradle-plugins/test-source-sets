@@ -56,6 +56,12 @@ allprojects {
             }
         }
 
+        configurations.create('annotationProcessorAll') { Configuration conf ->
+            sourceSets.all { SourceSet sourceSet ->
+                configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
+            }
+        }
+
         dependencies {
             compileOnlyAll 'com.google.code.findbugs:jsr305'
             compileOnlyAll 'org.jetbrains:annotations'
