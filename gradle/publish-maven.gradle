@@ -49,11 +49,6 @@ allprojects {
             if (pluginManager.hasPlugin('java-library')
                 && !pluginManager.hasPlugin('com.gradle.plugin-publish')
             ) {
-                java {
-                    withJavadocJar()
-                    withSourcesJar()
-                }
-
                 publishing.publications.create('maven', MavenPublication) {
                     from components.java
                 }
