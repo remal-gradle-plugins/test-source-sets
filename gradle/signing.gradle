@@ -1,15 +1,14 @@
 allprojects {
-    if (hasProperty('signing.key') && !property('signing.key').toString().isEmpty()) {
+    String signingKey = findProperty('signing.key')?.toString()
+    String signingKeyId = findProperty('signing.keyId')?.toString()
+    String signingPassword = findProperty('signing.password')?.toString()
+    if (signingKey != null && !signingKey.isEmpty()) {
         apply plugin: 'signing'
     }
 
     pluginManager.withPlugin('signing') {
         signing {
-            useInMemoryPgpKeys(
-                findProperty('signing.keyId')?.toString(),
-                findProperty('signing.key')?.toString(),
-                findProperty('signing.password')?.toString()
-            )
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
         }
     }
 }
