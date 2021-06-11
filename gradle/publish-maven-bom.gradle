@@ -1,3 +1,7 @@
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+
 allprojects {
     rootProject.evaluationDependsOnChildren()
     pluginManager.withPlugin('maven-publish') {
@@ -14,23 +18,23 @@ allprojects {
                 name = "${prevName}: BOM"
                 description = "${prevName}: Bill of Materials (BOM)"
                 it.withXml {
-                    asNode().children().last() + {
-                        dependencyManagement([:]) {
-                            dependencies([:]) {
-                                List<MavenPublication> otherPublications = allprojects
-                                    .findAll { it.pluginManager.hasPlugin('maven-publish') }
-                                    .collect { it.publishing.publications.withType(MavenPublication).collect() }
-                                    .flatten()
-                                    .findAll { it != publication }
-                                for (MavenPublication otherPublication : otherPublications) {
-                                    dependency([:]) {
-                                        groupId([:], otherPublication.groupId)
-                                        artifactId([:], otherPublication.artifactId)
-                                        version([:], otherPublication.version)
-                                    }
-                                }
-                            }
-                        }
+                    Element root = asElement()
+                    Document document = root.ownerDocument
+                    Node dependencyManagement = root.appendChild(document.createElement("dependencyManagement"))
+                    Node dependencies = dependencyManagement.appendChild(document.createElement("dependencies"))
+                    List<MavenPublication> otherPublications = allprojects
+                        .findAll { it.pluginManager.hasPlugin('maven-publish') }
+                        .collect { it.publishing.publications.withType(MavenPublication).collect() }
+                        .flatten()
+                        .findAll { it != publication }
+                    for (MavenPublication otherPublication : otherPublications) {
+                        Node dependency = dependencies.appendChild(document.createElement("dependency"))
+                        dependency.appendChild(document.createElement("groupId"))
+                            .setTextContent(otherPublication.groupId)
+                        dependency.appendChild(document.createElement("artifactId"))
+                            .setTextContent(otherPublication.artifactId)
+                        dependency.appendChild(document.createElement("version"))
+                            .setTextContent(otherPublication.version)
                     }
                 }
             }
