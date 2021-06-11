@@ -1,0 +1,39 @@
+allprojects {
+    rootProject.evaluationDependsOnChildren()
+    pluginManager.withPlugin('maven-publish') {
+        if (project != rootProject) {
+            rootProject.pluginManager.apply('maven-publish')
+            return
+        }
+
+        publishing.publications.create('mavenBom', MavenPublication) { publication ->
+            publication.artifactId += '-bom'
+
+            publication.pom {
+                String prevName = name.get()
+                name = "${prevName}: BOM"
+                description = "${prevName}: Bill of Materials (BOM)"
+                it.withXml {
+                    asNode().children().last() + {
+                        dependencyManagement([:]) {
+                            dependencies([:]) {
+                                List<MavenPublication> otherPublications = allprojects
+                                    .findAll { it.pluginManager.hasPlugin('maven-publish') }
+                                    .collect { it.publishing.publications.withType(MavenPublication).collect() }
+                                    .flatten()
+                                    .findAll { it != publication }
+                                for (MavenPublication otherPublication : otherPublications) {
+                                    dependency([:]) {
+                                        groupId([:], otherPublication.groupId)
+                                        artifactId([:], otherPublication.artifactId)
+                                        version([:], otherPublication.version)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
