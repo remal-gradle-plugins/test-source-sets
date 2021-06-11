@@ -81,7 +81,7 @@ public class BaseProjectTestExtension implements BeforeEachCallback, AfterEachCa
             }
 
             val isExceptionThrown = context.getExecutionException().isPresent();
-            if (isExceptionThrown) {
+            if (!isExceptionThrown) {
                 if (!file.delete()) {
                     deleteDir(file);
                 }

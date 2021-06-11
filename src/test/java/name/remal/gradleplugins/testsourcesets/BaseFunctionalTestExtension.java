@@ -74,8 +74,7 @@ public class BaseFunctionalTestExtension extends BaseProjectTestExtension {
         "has been deprecated and is scheduled to be removed in Gradle",
         "Deprecated Gradle features were used in this build",
         "This is scheduled to be removed in Gradle",
-        "This will fail with an error in Gradle",
-        "This behaviour has been deprecated and is scheduled to be removed in Gradle"
+        "This will fail with an error in Gradle"
     ));
 
     private static final List<SuppressedDeprecation> SUPPRESSED_DEPRECATIONS = unmodifiableList(asList(
