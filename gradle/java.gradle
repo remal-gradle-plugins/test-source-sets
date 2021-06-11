@@ -10,11 +10,6 @@ allprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8.toString()
         targetCompatibility = sourceCompatibility.toString()
 
-        java {
-            withJavadocJar()
-            withSourcesJar()
-        }
-
         repositories {
             mavenCentral()
             gradlePluginPortal()
