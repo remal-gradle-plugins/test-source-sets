@@ -4,7 +4,7 @@ allprojects {
     }
 
     pluginManager.withPlugin('maven-publish') {
-        apply plugin: 'java-library'
+        apply plugin: 'java'
 
         publishing.publications.withType(MavenPublication) {
             versionMapping {
@@ -46,17 +46,15 @@ allprojects {
         }
 
         afterEvaluate {
-            if (!pluginManager.hasPlugin('com.gradle.plugin-publish')) {
+            if (pluginManager.hasPlugin('java-library')
+                && !pluginManager.hasPlugin('com.gradle.plugin-publish')
+            ) {
                 java {
                     withJavadocJar()
                     withSourcesJar()
                 }
 
                 publishing.publications.create('maven', MavenPublication) {
-                    it.groupId = project.group.toString()
-                    it.artifactId = project.name.toString()
-                    it.version = project.version.toString()
-
                     from components.java
                 }
             }
