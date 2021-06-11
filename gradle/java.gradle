@@ -154,8 +154,7 @@ allprojects {
         }
 
         tasks.withType(Javadoc) {
-            options.addStringOption('-quiet')
-            options.addStringOption('Xdoclint:none')
+            options.addBooleanOption('Xdoclint:none', true)
             if (JavaVersion.current().isJava9Compatible()) {
                 options.addBooleanOption('html5', true)
             }
