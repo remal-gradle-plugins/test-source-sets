@@ -74,8 +74,18 @@ allprojects {
         rootPackage += ".${rootProject.name}"
     }
     ext['baseJavaPackage'] = "${rootPackage}${project.path}"
-        .replace('-', '')
         .replace(':', '.')
-        .replaceFirst(/\.+$/, '')
         .replaceAll(/\.{2,}/, '.')
+        .replaceFirst(/\.+$/, '')
+        .replaceAll(/[^\w.]/, '')
+
+    String rootJavaModuleName = rootProject.group
+    if (!rootJavaModuleName.endsWith(".${rootProject.name}")) {
+        rootJavaModuleName += ".${rootProject.name}"
+    }
+    ext['javaModuleName'] = "${rootJavaModuleName}${project.path}"
+        .replace(':', '.')
+        .replaceAll(/\.{2,}/, '.')
+        .replaceFirst(/\.+$/, '')
+        .replaceAll(/[^\w.]/, '')
 }
