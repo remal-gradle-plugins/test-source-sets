@@ -16,5 +16,21 @@ allprojects {
                 it.version = project.version.toString()
             }
         }
+
+        pluginManager.withPlugin('maven-publish') {
+            afterEvaluate {
+                publishing.publications.withType(MavenPublication).findAll({ it.component != null }).forEach { pub ->
+                    MavenArtifactSet artifacts = pub.artifacts
+                    ['sources', 'javadoc', 'groovydoc'].forEach { classifier ->
+                        if (!artifacts.any { it.classifier == classifier }) {
+                            Jar jarTask = tasks.withType(Jar).find { it.archiveClassifier.getOrNull() == classifier }
+                            if (jarTask != null) {
+                                pub.artifact(jarTask)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
