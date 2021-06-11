@@ -66,4 +66,9 @@ allprojects {
             }
         }
     }
+
+    tasks.register('generateAllPoms') {
+        group = 'publishing'
+        dependsOn(tasks.withType(GenerateMavenPom))
+    }
 }
