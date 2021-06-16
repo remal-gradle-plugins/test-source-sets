@@ -58,11 +58,14 @@ allprojects {
         configureRenovate.doLast {
             forSettings { settings ->
                 Configuration apiConf = configurations[sourceSets.main.apiConfigurationName]
-                List<String> apiDeps = apiConf.allDependencies
+                Configuration indirectApiConf = configurations.indirectApi
+                List<String> apiDeps = [apiConf.allDependencies, indirectApiConf.allDependencies]
+                    .flatten()
                     .findAll { it instanceof ExternalModuleDependency }
                     .findAll { !(it instanceof ClientModule) }
                     .findAll { it.attributes.getAttribute(Category.CATEGORY_ATTRIBUTE) == null }
                     .collect { "${it.group}:${it.name}" }
+                    .unique(false)
 
                 def packageRules = settings.packageRules
                 if (!(packageRules instanceof List)) {

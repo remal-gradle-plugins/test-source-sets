@@ -35,6 +35,7 @@ allprojects {
         }
 
         configurations.create('compileOnlyAll') { Configuration conf ->
+            conf.description("Compile-only dependencies for all source-sets")
             sourceSets.all { SourceSet sourceSet ->
                 configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
             }
@@ -42,6 +43,7 @@ allprojects {
 
         configurations.create('optional') { Configuration conf ->
             sourceSets.all { SourceSet sourceSet ->
+                conf.description("Optional dependencies")
                 if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
                     configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
                 } else {
@@ -51,6 +53,7 @@ allprojects {
         }
 
         configurations.create('apt') { Configuration conf ->
+            conf.description("Annotation processors and compile-only dependencies for all source-sets")
             sourceSets.all { SourceSet sourceSet ->
                 configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
                 configurations[sourceSet.compileOnlyConfigurationName].extendsFrom(conf)
@@ -58,9 +61,17 @@ allprojects {
         }
 
         configurations.create('annotationProcessorAll') { Configuration conf ->
+            conf.description("Annotation processors for all source-sets")
             sourceSets.all { SourceSet sourceSet ->
                 configurations[sourceSet.annotationProcessorConfigurationName].extendsFrom(conf)
             }
+        }
+
+        configurations.create('indirectApi') { Configuration conf ->
+            conf.description(
+                "Indirect API dependencies (form example: default dependencies for configurations that" +
+                    " are created by the plugin)"
+            )
         }
 
         dependencies {
