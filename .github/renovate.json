@@ -1,11 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>remal/renovate-config:global"
-  ],
-  "semanticCommits": "disabled",
-  "git-submodules": {
-    "enabled": false
-  },
-  "packageRules": []
+  "extends": ["github>remal-gradle-plugins/plugins-renovate-config:base"]
 }
