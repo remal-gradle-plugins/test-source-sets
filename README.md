@@ -1,4 +1,4 @@
-**Min supported Gradle version: <!--property:gradle-api.min-version-->7.0<!--/property-->**
+**Min supported Gradle version: <!--property:gradle-api.min-version-->6.0<!--/property-->**
 
 # `name.remal.test-source-sets` plugin
 
