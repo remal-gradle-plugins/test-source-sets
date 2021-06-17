@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import name.remal.gradleplugins.toolkit.testkit.MinSupportedGradleVersion;
 import name.remal.gradleplugins.toolkit.testkit.functional.GradleProject;
+import org.gradle.util.GradleVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,15 +64,16 @@ class TestSourceSetsPluginFunctionalTest {
     private static final String CORRESPONDING_KOTLIN_VERSION_PROPERTY = "corresponding-kotlin.version";
 
     private static String getCorrespondingKotlinVersion() {
-        val version = Optional.ofNullable(System.getProperty(CORRESPONDING_KOTLIN_VERSION_PROPERTY))
+        return Optional.ofNullable(System.getProperty(CORRESPONDING_KOTLIN_VERSION_PROPERTY))
             .filter(it -> !it.isEmpty())
             .orElseThrow(() -> new AssertionError(
                 CORRESPONDING_KOTLIN_VERSION_PROPERTY + " system property is not set or empty"
             ));
+    }
 
-        System.err.println("Corresponding Kotlin version: " + version);
-
-        return version;
+    static {
+        System.err.println("Gradle version: " + GradleVersion.current().getVersion());
+        System.err.println("Corresponding Kotlin version: " + getCorrespondingKotlinVersion());
     }
 
 }
