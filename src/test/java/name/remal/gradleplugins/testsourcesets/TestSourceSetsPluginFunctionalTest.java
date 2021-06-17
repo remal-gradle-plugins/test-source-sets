@@ -63,11 +63,15 @@ class TestSourceSetsPluginFunctionalTest {
     private static final String CORRESPONDING_KOTLIN_VERSION_PROPERTY = "corresponding-kotlin.version";
 
     private static String getCorrespondingKotlinVersion() {
-        return Optional.ofNullable(System.getProperty(CORRESPONDING_KOTLIN_VERSION_PROPERTY))
+        val version = Optional.ofNullable(System.getProperty(CORRESPONDING_KOTLIN_VERSION_PROPERTY))
             .filter(it -> !it.isEmpty())
             .orElseThrow(() -> new AssertionError(
                 CORRESPONDING_KOTLIN_VERSION_PROPERTY + " system property is not set or empty"
             ));
+
+        System.err.println("Corresponding Kotlin version: " + version);
+
+        return version;
     }
 
 }
