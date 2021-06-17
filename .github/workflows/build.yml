@@ -227,6 +227,9 @@ jobs:
     - name: Unarchive workspace
       run: |
         tar -xz -f "${{steps.download-workspace.outputs.download-path}}/workspace-${{github.run_id}}.tar.gz"
+    - name: Update README
+      run: |
+        ./gradlew processReadme
     - name: Update Renovate config
       run: |
         ./gradlew configureRenovate

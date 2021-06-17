@@ -34,8 +34,9 @@ apply from: 'gradle/publish-maven.gradle'
 apply from: 'gradle/publish-maven-bom.gradle'
 apply from: 'gradle/publish-maven-central.gradle'
 apply from: 'gradle/signing.gradle'
-apply from: 'gradle/ide.gradle'
+apply from: 'gradle/process-readme.gradle'
 apply from: 'gradle/renovate.gradle'
+apply from: 'gradle/ide.gradle'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
