@@ -1,5 +1,6 @@
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.internal.tasks.compile.HasCompileOptions
 
 allprojects {
@@ -30,6 +31,32 @@ allprojects {
                     includeGroup('name.remal.gradle-api')
                 } else {
                     excludeGroup('name.remal.gradle-api')
+                }
+            }
+        }
+
+        AtomicBoolean isSnapshotMavenLocalRepositoryAdded = new AtomicBoolean(false)
+        def addSnapshotMavenLocalRepository = {
+            if (isSnapshotMavenLocalRepositoryAdded.compareAndSet(false, true)) {
+                project.repositories.mavenLocal {
+                    name = "${ArtifactRepositoryContainer.DEFAULT_MAVEN_LOCAL_REPO_NAME} for SNAPSHOT dependencies"
+                    content {
+                        includeVersionByRegex(/.+/, /.+/, /.+-SNAPSHOT$/)
+                    }
+                }
+            }
+        }
+        configurations.all { Configuration conf ->
+            conf.dependencies.all { Dependency dep ->
+                String dependencyVersion = dep.version ?: ''
+                if (dep instanceof ExternalModuleDependency && dependencyVersion.endsWith('-SNAPSHOT')) {
+                    addSnapshotMavenLocalRepository()
+                }
+            }
+            conf.dependencyConstraints.all { DependencyConstraint constraint ->
+                String constraintVersion = constraint.version ?: ''
+                if (constraintVersion.endsWith('-SNAPSHOT')) {
+                    addSnapshotMavenLocalRepository()
                 }
             }
         }
