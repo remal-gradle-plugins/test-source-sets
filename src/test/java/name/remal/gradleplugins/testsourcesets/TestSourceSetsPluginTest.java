@@ -11,7 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import lombok.RequiredArgsConstructor;
 import lombok.val;
+import name.remal.gradleplugins.toolkit.testkit.ApplyPlugin;
+import name.remal.gradleplugins.toolkit.testkit.MinSupportedGradleVersion;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -24,13 +27,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class TestSourceSetsPluginTest extends BaseProjectTestExtension {
+@RequiredArgsConstructor
+class TestSourceSetsPluginTest {
 
-    private final Project project = newProject();
-
-    {
-        project.getPluginManager().apply(TestSourceSetsPlugin.class);
-    }
+    @ApplyPlugin(type = TestSourceSetsPlugin.class)
+    private final Project project;
 
 
     @Test
