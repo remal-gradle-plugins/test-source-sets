@@ -30,7 +30,11 @@ allprojects {
                 "org.mockito:mockito-core:$mockitoVersion",
                 "org.mockito:mockito-inline:$mockitoVersion",
                 "org.mockito:mockito-junit-jupiter:$mockitoVersion",
-            ].collect { project.dependencies.constraints.create(it) }
+            ].collect {
+                project.dependencies.constraints.create(it) { DependencyConstraint constraint ->
+                    constraint.version { it.strictly(constraint.version) }
+                }
+            }
         )
 
         conf.extendsFrom = []
