@@ -12,6 +12,8 @@ allprojects {
                 usage('java-runtime') { fromResolutionOf('runtimeClasspath') }
             }
 
+            moduleDescriptorGenerator = null
+
             pom {
                 String displayName = property('repository-name')
                 String ownerName = property('repository-owner-name')
