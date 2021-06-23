@@ -6,6 +6,10 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static name.remal.gradleplugins.testsourcesets.TestSourceSetsKotlinConfigurer.configureKotlinTestSourceSets;
+import static name.remal.gradleplugins.testsourcesets.TestTaskNameExtension.getTestTaskName;
+import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.createExtension;
+import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradleplugins.toolkit.SneakyThrowUtils.sneakyThrows;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
@@ -21,9 +25,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import lombok.SneakyThrows;
 import lombok.val;
-import org.gradle.api.Action;
+import name.remal.gradleplugins.testsourcesets.internal.DefaultTestTaskNameExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
@@ -37,7 +40,6 @@ import org.gradle.api.tasks.testing.Test;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
 import org.gradle.util.GradleVersion;
-import org.jetbrains.annotations.NotNull;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
@@ -53,7 +55,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(JavaPlugin.class);
-        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+        val sourceSets = getExtension(project, SourceSetContainer.class);
 
         val testSourceSets = createTestSourceSetContainer(project, sourceSets);
         project.getExtensions().add(TestSourceSetContainer.class, TEST_SOURCE_SETS_EXTENSION_NAME, testSourceSets);
@@ -62,6 +64,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         testSourceSets.add(testSourceSet);
 
         configureConfigurations(project);
+        configureTestTaskNameExtension(project);
         configureTestTasks(project);
         configureIdea(project);
 
@@ -94,43 +97,47 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     );
 
     private static void configureConfigurations(Project project) {
-        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
-
         val configurationNameMethods = Stream.of(SourceSet.class.getMethods())
             .filter(it -> GET_CONFIGURATION_NAME_METHOD_NAME.matcher(it.getName()).matches())
             .collect(toList());
 
         val configurations = project.getConfigurations();
 
-        //noinspection Convert2Lambda
-        testSourceSets.matching(it -> it != testSourceSet).all(new Action<SourceSet>() {
-            @Override
-            @SneakyThrows
-            public void execute(@NotNull SourceSet sourceSet) {
-                for (val method : configurationNameMethods) {
-                    val testConfigurationName = method.invoke(testSourceSet);
-                    val configurationName = method.invoke(sourceSet);
-                    if (testConfigurationName == null
-                        || configurationName == null
-                        || Objects.equals(testConfigurationName, configurationName)
-                    ) {
-                        continue;
-                    }
-
-                    configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration -> {
-                        configurations.matching(it -> it.getName().equals(configurationName)).all(configuration -> {
-                            configuration.extendsFrom(testConfiguration);
-                        });
-                    });
+        val testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> sneakyThrows(() -> {
+            for (val method : configurationNameMethods) {
+                val testConfigurationName = method.invoke(testSourceSet);
+                val configurationName = method.invoke(sourceSet);
+                if (testConfigurationName == null
+                    || configurationName == null
+                    || Objects.equals(testConfigurationName, configurationName)
+                ) {
+                    continue;
                 }
+
+                configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration -> {
+                    configurations.matching(it -> it.getName().equals(configurationName)).all(configuration -> {
+                        configuration.extendsFrom(testConfiguration);
+                    });
+                });
             }
-        });
+        }));
     }
 
 
-    private static final Pattern WORD_TEST_REGEXP = Pattern.compile("(^|[a-z0-9_]|\\b)[Tt]est([A-Z0-9_]|\\b|$)");
+    private static void configureTestTaskNameExtension(Project project) {
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        testSourceSets.all(testSourceSet -> {
+            createExtension(
+                testSourceSet,
+                TestTaskNameExtension.class,
+                DefaultTestTaskNameExtension.class,
+                testSourceSet
+            );
+        });
+    }
+
 
     private static void configureTestTasks(Project project) {
         val allTestsTask = project.getTasks().register(ALL_TESTS_TASK_NAME, task -> {
@@ -139,19 +146,10 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             task.dependsOn(TEST_TASK_NAME);
         });
 
-        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.whenObjectAdded(testSourceSet -> {
-            final String taskName;
-            {
-                val hasWordTest = WORD_TEST_REGEXP.matcher(testSourceSet.getName()).find();
-                if (hasWordTest) {
-                    taskName = testSourceSet.getTaskName(null, null);
-                } else {
-                    taskName = testSourceSet.getTaskName(null, "test");
-                }
-            }
-
-            project.getTasks().register(taskName, Test.class, task -> {
+            val testTaskName = getTestTaskName(testSourceSet);
+            project.getTasks().register(testTaskName, Test.class, task -> {
                 task.setGroup(VERIFICATION_GROUP);
                 task.setDescription("Runs " + testSourceSet.getName() + " tests");
 
@@ -169,12 +167,12 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 }
             });
 
-            allTestsTask.configure(it -> it.dependsOn(taskName));
+            allTestsTask.configure(it -> it.dependsOn(testTaskName));
         });
     }
 
     private static void configureTestTaskModularity(Project project, Test testTask) {
-        JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
+        JavaPluginExtension javaPluginExtension = getExtension(project, JavaPluginExtension.class);
         testTask.getModularity().getInferModulePath()
             .convention(javaPluginExtension.getModularity().getInferModulePath());
     }
@@ -182,7 +180,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
     private static void configureIdea(Project project) {
         project.getPluginManager().withPlugin("idea", __ -> {
-            val ideaModel = project.getExtensions().getByType(IdeaModel.class);
+            val ideaModel = getExtension(project, IdeaModel.class);
             val module = ideaModel.getModule();
             if (module != null) {
                 configureIdeaModule(project, module);
@@ -191,8 +189,8 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
     private static void configureIdeaModule(Project project, IdeaModule module) {
-        val sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
-        val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
+        val sourceSets = getExtension(project, SourceSetContainer.class);
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
         testSourceSets.all(testSourceSet -> {
             project.getConfigurations().all(conf -> {
