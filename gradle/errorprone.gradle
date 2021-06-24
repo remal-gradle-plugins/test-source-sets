@@ -1,0 +1,24 @@
+allprojects {
+    pluginManager.withPlugin('java') {
+        apply plugin: 'net.ltgt.errorprone'
+
+        dependencies {
+            errorprone 'com.google.errorprone:error_prone_core'
+            errorprone 'com.uber.nullaway:nullaway'
+
+            compileOnlyAll 'com.google.errorprone:error_prone_annotations'
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.errorprone {
+                disableWarningsInGeneratedCode = true
+                disable(
+                    'SameNameButDifferent' // false positives with lombok.val
+                )
+
+                option('NullAway:AnnotatedPackages', project.property('baseJavaPackage').toString())
+                option('NullAway:HandleTestAssertionLibraries', true)
+            }
+        }
+    }
+}
