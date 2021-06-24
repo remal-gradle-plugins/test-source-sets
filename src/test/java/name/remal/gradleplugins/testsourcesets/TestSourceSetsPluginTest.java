@@ -309,7 +309,7 @@ class TestSourceSetsPluginTest {
         void all_test_source_sets_are_associated_with_main_compilation() {
             val kotlin = getExtension(project, KotlinSingleTargetExtension.class);
             val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-            val anotherTestSourceSet = testSourceSets.create("another");
+            testSourceSets.create("another");
 
             val compilations = kotlin.getTarget().getCompilations();
             val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
