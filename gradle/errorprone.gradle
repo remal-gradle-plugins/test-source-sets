@@ -4,7 +4,6 @@ allprojects {
 
         dependencies {
             errorprone 'com.google.errorprone:error_prone_core'
-            errorprone 'com.uber.nullaway:nullaway'
 
             compileOnlyAll 'com.google.errorprone:error_prone_annotations'
         }

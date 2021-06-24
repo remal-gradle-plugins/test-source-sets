@@ -16,7 +16,6 @@ allprojects {
                 'org.jetbrains:annotations:20.1.0',
                 'com.google.errorprone:error_prone_annotations:2.7.1',
                 'com.google.errorprone:error_prone_core:2.7.1',
-                'com.uber.nullaway:nullaway:0.9.1',
 
                 // Annotation processing
                 'org.projectlombok:lombok:1.18.20',
