@@ -64,6 +64,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         testSourceSets.add(testSourceSet);
 
         configureConfigurations(project);
+        configureClasspaths(project);
         configureTestTaskNameExtension(project);
         configureTestTasks(project);
         configureIdea(project);
@@ -123,6 +124,27 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 });
             }
         }));
+    }
+
+
+    private static void configureClasspaths(Project project) {
+        val sourceSets = getExtension(project, SourceSetContainer.class);
+        val mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
+        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        val configurations = project.getConfigurations();
+
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> {
+            sourceSet.setCompileClasspath(
+                mainSourceSet.getOutput()
+                    .plus(configurations.getByName(sourceSet.getCompileClasspathConfigurationName()))
+            );
+            sourceSet.setRuntimeClasspath(
+                sourceSet.getOutput()
+                    .plus(mainSourceSet.getOutput())
+                    .plus(configurations.getByName(sourceSet.getRuntimeClasspathConfigurationName()))
+            );
+        });
     }
 
 
