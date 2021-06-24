@@ -1,5 +1,11 @@
 allprojects {
 
+    ext['isRunningOnCi'] = false
+    if (System.getenv('CI') == 'true') {
+        ext['isRunningOnCi'] = true
+    }
+    ext['isNotRunningOnCi'] = !ext['isRunningOnCi']
+
     String gitRef = property('git-ref')
     String versionGitRefPrefix = 'refs/tags/v'
     if (gitRef.startsWith(versionGitRefPrefix)) {
@@ -16,7 +22,7 @@ allprojects {
         }
     }
 
-    gradle.startParameter.showStacktrace = 'ALWAYS'
+    //gradle.startParameter.showStacktrace = 'ALWAYS'
 
     tasks.create('downloadDependencies') {
         doLast {
