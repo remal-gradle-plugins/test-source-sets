@@ -8,6 +8,8 @@ allprojects {
             }
         }
 
+        testSourceSets.create('functional')
+
         dependencies {
             optional 'name.remal.gradle-api:gradle-api'
 

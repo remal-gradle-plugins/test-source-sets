@@ -44,10 +44,6 @@ allprojects {
         }
     }
 
-    tasks.register('allTests') { Task task ->
-        task.dependsOn(tasks.matching { it instanceof AbstractTestTask })
-    }
-
 
     afterEvaluate {
         def disableTask = { Task task ->
