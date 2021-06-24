@@ -4,6 +4,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 gradle.beforeProject { Project project ->
     project.buildscript { buildscript ->
+        buildscript.repositories {
+            gradlePluginPortal()
+            mavenCentral()
+        }
+
         AtomicBoolean isSnapshotMavenLocalRepositoryAdded = new AtomicBoolean(false)
         def addSnapshotMavenLocalRepository = {
             if (isSnapshotMavenLocalRepositoryAdded.compareAndSet(false, true)) {
