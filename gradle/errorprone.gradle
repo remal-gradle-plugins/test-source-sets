@@ -19,5 +19,11 @@ allprojects {
                 option('NullAway:HandleTestAssertionLibraries', true)
             }
         }
+
+        testSourceSets.all { SourceSet sourceSet ->
+            tasks.named(sourceSet.getCompileTaskName('java'), JavaCompile) {
+                options.errorprone.compilingTestOnlyCode = true
+            }
+        }
     }
 }
