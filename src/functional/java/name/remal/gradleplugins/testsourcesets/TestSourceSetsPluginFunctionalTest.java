@@ -1,7 +1,7 @@
 package name.remal.gradleplugins.testsourcesets;
 
 import static name.remal.gradleplugins.testsourcesets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
-import static name.remal.gradleplugins.toolkit.StringEscapeUtils.escapeGroovy;
+import static name.remal.gradleplugins.toolkit.StringUtils.escapeGroovy;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
