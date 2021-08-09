@@ -65,7 +65,7 @@ A task named `allTests` is created by the plugin. This task simply depends on [T
 A special extension is added to all test source set, that provides `getTestTaskName()` method. This method can be used like this:
 
 ```groovy
-testSourceSet.all { sourceSet ->
+testSourceSet.configureEach { sourceSet ->
   String testTaskName = sourceSet.testTaskName
   println testTaskName // print corresponding Test task name
 }

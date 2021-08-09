@@ -44,6 +44,10 @@ allprojects {
         }
     }
 
+    afterEvaluate {
+        tasks.maybeCreate('allTests')
+    }
+
 
     afterEvaluate {
         def disableTask = { Task task ->
