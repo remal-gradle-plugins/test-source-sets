@@ -36,32 +36,6 @@ allprojects {
             }
         }
 
-        AtomicBoolean isSnapshotMavenLocalRepositoryAdded = new AtomicBoolean(false)
-        def addSnapshotMavenLocalRepository = {
-            if (isSnapshotMavenLocalRepositoryAdded.compareAndSet(false, true)) {
-                project.repositories.mavenLocal {
-                    name = "${ArtifactRepositoryContainer.DEFAULT_MAVEN_LOCAL_REPO_NAME} for SNAPSHOT dependencies"
-                    content {
-                        includeVersionByRegex(/.+/, /.+/, /.+-SNAPSHOT$/)
-                    }
-                }
-            }
-        }
-        configurations.all { Configuration conf ->
-            conf.dependencies.all { Dependency dep ->
-                String dependencyVersion = dep.version ?: ''
-                if (dep instanceof ExternalModuleDependency && dependencyVersion.endsWith('-SNAPSHOT')) {
-                    addSnapshotMavenLocalRepository()
-                }
-            }
-            conf.dependencyConstraints.all { DependencyConstraint constraint ->
-                String constraintVersion = constraint.version ?: ''
-                if (constraintVersion.endsWith('-SNAPSHOT')) {
-                    addSnapshotMavenLocalRepository()
-                }
-            }
-        }
-
         configurations.create('compileOnlyAll') { Configuration conf ->
             conf.description("Compile-only dependencies for all source-sets")
             sourceSets.all { SourceSet sourceSet ->
