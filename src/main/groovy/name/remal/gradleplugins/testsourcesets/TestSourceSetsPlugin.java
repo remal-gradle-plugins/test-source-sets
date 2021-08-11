@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static name.remal.gradleplugins.testsourcesets.TestSourceSetsKotlinConfigurer.configureKotlinTestSourceSets;
 import static name.remal.gradleplugins.testsourcesets.TestTaskNameExtension.getTestTaskName;
+import static name.remal.gradleplugins.toolkit.ConventionUtils.addConventionPlugin;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.createExtension;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.SneakyThrowUtils.sneakyThrows;
@@ -151,12 +152,13 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     private static void configureTestTaskNameExtension(Project project) {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.all(testSourceSet -> {
-            createExtension(
+            val extension = createExtension(
                 testSourceSet,
                 TestTaskNameExtension.class,
                 DefaultTestTaskNameExtension.class,
                 testSourceSet
             );
+            addConventionPlugin(testSourceSet, extension);
         });
     }
 
