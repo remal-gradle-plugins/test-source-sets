@@ -48,6 +48,35 @@ allprojects {
         tasks.maybeCreate('allTests')
     }
 
+    tasks.create('buildWithAllTests') {
+        group = 'build'
+        dependsOn(project.tasks.matching { it.name == 'build' })
+        dependsOn(project.tasks.matching { it.name == 'allTests' })
+    }
+
+    tasks.create('buildInstall') {
+        group = 'build'
+        dependsOn('build')
+        dependsOn(project.tasks.matching { it.name == 'publishToMavenLocal' })
+    }
+
+    tasks.create('buildInstallWithAllTests') {
+        group = 'build'
+        dependsOn('buildWithAllTests')
+        dependsOn(project.tasks.matching { it.name == 'publishToMavenLocal' })
+    }
+
+    project.tasks.matching { it.name == 'publishToMavenLocal' }.all {
+        mustRunAfter(
+            project.provider {
+                project.rootProject.allprojects
+                    .collect { it.tasks }
+                    .collect { it.matching { it.name == 'build' || it.name == 'allTests' } }
+                    .toList()
+            }
+        )
+    }
+
 
     afterEvaluate {
         def disableTask = { Task task ->

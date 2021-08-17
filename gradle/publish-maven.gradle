@@ -75,4 +75,22 @@ allprojects {
         group = 'publishing'
         dependsOn(tasks.withType(GenerateMavenPom))
     }
+
+    tasks.withType(AbstractPublishToMaven) {
+        mustRunAfter(
+            project.provider {
+                project.rootProject.allprojects
+                    .collect { it.tasks }
+                    .collect {
+                        it.matching {
+                            it.name == 'build'
+                                || it.name == 'allTests'
+                                || it instanceof AbstractTestTask
+                                || it instanceof VerificationTask
+                        }
+                    }
+                    .toList()
+            }
+        )
+    }
 }
