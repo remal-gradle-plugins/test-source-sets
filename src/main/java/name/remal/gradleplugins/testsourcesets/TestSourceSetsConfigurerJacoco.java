@@ -55,11 +55,10 @@ abstract class TestSourceSetsConfigurerJacoco {
                     .getByName(MAIN_SOURCE_SET_NAME)
                 );
 
-                val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
                 reportTask.getReports().all(action(report -> {
                     if (report.getOutputType().equals(DIRECTORY)) {
                         report.setDestination(project.provider(() -> {
-                            val reportsDir = reportsDirProvider.call();
+                            val reportsDir = getBaseJacocoReportsDir(project);
                             return new File(
                                 reportsDir,
                                 testTaskName + '/' + report.getName()
@@ -67,7 +66,7 @@ abstract class TestSourceSetsConfigurerJacoco {
                         }));
                     } else {
                         report.setDestination(project.provider(() -> {
-                            val reportsDir = reportsDirProvider.call();
+                            val reportsDir = getBaseJacocoReportsDir(project);
                             return new File(
                                 reportsDir,
                                 testTaskName + "/" + reportTask.getName() + "." + report.getName()
@@ -106,7 +105,7 @@ abstract class TestSourceSetsConfigurerJacoco {
         };
     }
 
-    private static Callable<File> createBaseJacocoReportsDirProvider(Project project) {
+    private static File getBaseJacocoReportsDir(Project project) {
         val jacoco = getExtension(project, JacocoPluginExtension.class);
         val getReportsDirectory = findMethod(
             classOf(jacoco),
@@ -114,7 +113,7 @@ abstract class TestSourceSetsConfigurerJacoco {
             "getReportsDirectory"
         );
         if (getReportsDirectory != null) {
-            return () -> requireNonNull(getReportsDirectory.invoke(jacoco)).getAsFile().get();
+            return requireNonNull(getReportsDirectory.invoke(jacoco)).getAsFile().get();
         }
 
         val getReportsDir = findMethod(
@@ -123,10 +122,10 @@ abstract class TestSourceSetsConfigurerJacoco {
             "getReportsDir"
         );
         if (getReportsDir != null) {
-            return () -> requireNonNull(getReportsDir.invoke(jacoco));
+            return requireNonNull(getReportsDir.invoke(jacoco));
         }
 
-        throw new UnsupportedOperationException("Can't get jacoco reports dir");
+        throw new UnsupportedOperationException("Can't get Jacoco reports dir");
     }
 
 
