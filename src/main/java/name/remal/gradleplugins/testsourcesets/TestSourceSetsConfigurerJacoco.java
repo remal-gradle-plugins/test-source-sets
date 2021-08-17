@@ -42,20 +42,20 @@ abstract class TestSourceSetsConfigurerJacoco {
         project.getTasks().register(
             "jacoco" + capitalize(testTaskName) + "Report",
             JacocoReport.class,
-            reportTask -> {
-                reportTask.mustRunAfter(testTaskName);
-                reportTask.setGroup(VERIFICATION_GROUP);
-                reportTask.setDescription(format(
+            task -> {
+                task.mustRunAfter(testTaskName);
+                task.setGroup(VERIFICATION_GROUP);
+                task.setDescription(format(
                     "Generates code coverage report for the %s task.",
                     testTaskName
                 ));
-                reportTask.executionData(createExecutionDataProvider(project, testTaskName));
-                reportTask.sourceSets(getExtension(project, SourceSetContainer.class)
+                task.executionData(createExecutionDataProvider(project, testTaskName));
+                task.sourceSets(getExtension(project, SourceSetContainer.class)
                     .getByName(MAIN_SOURCE_SET_NAME)
                 );
 
                 val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
-                reportTask.getReports().all(report -> {
+                task.getReports().all(report -> {
                     if (report.getOutputType().equals(DIRECTORY)) {
                         report.setDestination(project.provider(() -> {
                             val reportsDir = reportsDirProvider.call();
@@ -69,7 +69,7 @@ abstract class TestSourceSetsConfigurerJacoco {
                             val reportsDir = reportsDirProvider.call();
                             return new File(
                                 reportsDir,
-                                testTaskName + "/" + reportTask.getName() + "." + report.getName()
+                                testTaskName + "/" + task.getName() + "." + report.getName()
                             );
                         }));
                     }
@@ -82,15 +82,15 @@ abstract class TestSourceSetsConfigurerJacoco {
         project.getTasks().register(
             "jacoco" + capitalize(testTaskName) + "CoverageVerification",
             JacocoCoverageVerification.class,
-            coverageVerificationTask -> {
-                coverageVerificationTask.mustRunAfter(testTaskName);
-                coverageVerificationTask.setGroup(VERIFICATION_GROUP);
-                coverageVerificationTask.setDescription(format(
+            task -> {
+                task.mustRunAfter(testTaskName);
+                task.setGroup(VERIFICATION_GROUP);
+                task.setDescription(format(
                     "Verifies code coverage metrics based on specified rules for the %s task.",
                     testTaskName
                 ));
-                coverageVerificationTask.executionData(createExecutionDataProvider(project, testTaskName));
-                coverageVerificationTask.sourceSets(getExtension(project, SourceSetContainer.class)
+                task.executionData(createExecutionDataProvider(project, testTaskName));
+                task.sourceSets(getExtension(project, SourceSetContainer.class)
                     .getByName(MAIN_SOURCE_SET_NAME)
                 );
             }
