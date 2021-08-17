@@ -35,6 +35,16 @@ class TestSourceSetsPluginFunctionalTest {
     }
 
     @Test
+    @DisplayName("empty build performs successfully")
+    void buildWithJacocoPerformsSuccessfully() {
+        project.forBuildFile(build -> {
+            build.applyPlugin("jacoco");
+            build.registerDefaultTask("jacocoTestAdditionalReport");
+        });
+        project.assertBuildSuccessfully();
+    }
+
+    @Test
     @DisplayName("Kotlin build with internal visibility performs successfully")
     @MinSupportedGradleVersion("6.1")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {

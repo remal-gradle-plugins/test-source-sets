@@ -296,6 +296,27 @@ class TestSourceSetsPluginTest {
 
 
     @Nested
+    @DisplayName("if 'jacoco' plugin is applied")
+    class IfJacocoPluginIsApplied {
+
+        {
+            project.getPluginManager().apply("jacoco");
+        }
+
+        @Test
+        @DisplayName("corresponding Report task is created for created test tasks")
+        void corresponding_report_task_is_created_for_created_test_tasks() {
+            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            testSourceSets.create("integration");
+
+            assertNotNull(project.getTasks().findByName("jacocoTestIntegrationReport"));
+            assertNotNull(project.getTasks().findByName("jacocoTestIntegrationCoverageVerification"));
+        }
+
+    }
+
+
+    @Nested
     @DisplayName("if 'kotlin' plugin is applied")
     class IfKotlinPluginIsApplied {
 

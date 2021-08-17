@@ -1,5 +1,6 @@
 package name.remal.gradleplugins.testsourcesets;
 
+import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static java.util.stream.Collectors.toCollection;
@@ -11,7 +12,10 @@ import static name.remal.gradleplugins.toolkit.ConventionUtils.addConventionPlug
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.createExtension;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.SneakyThrowUtils.sneakyThrows;
+import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
+import static org.gradle.api.internal.lambdas.SerializableLambdas.action;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
+import static org.gradle.api.reporting.Report.OutputType.DIRECTORY;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP;
@@ -30,6 +34,7 @@ import lombok.val;
 import name.remal.gradleplugins.testsourcesets.internal.DefaultTestTaskNameExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.internal.IConventionAware;
@@ -40,6 +45,10 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
+import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
+import org.gradle.testing.jacoco.tasks.JacocoReport;
 import org.gradle.util.GradleVersion;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
@@ -68,6 +77,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         configureClasspaths(project);
         configureTestTaskNameExtension(project);
         configureTestTasks(project);
+        configureJacoco(project);
         configureIdea(project);
 
         configureKotlinTestSourceSets(project);
@@ -118,11 +128,11 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                     continue;
                 }
 
-                configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration -> {
-                    configurations.matching(it -> it.getName().equals(configurationName)).all(configuration -> {
-                        configuration.extendsFrom(testConfiguration);
-                    });
-                });
+                configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration ->
+                    configurations.matching(it -> it.getName().equals(configurationName)).all(configuration ->
+                        configuration.extendsFrom(testConfiguration)
+                    )
+                );
             }
         }));
     }
@@ -202,6 +212,70 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 
+    private static void configureJacoco(Project project) {
+        project.getPluginManager().withPlugin("jacoco", __ -> {
+            val sourceSets = getExtension(project, SourceSetContainer.class);
+            val mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
+            val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+
+            val jacoco = getExtension(project, JacocoPluginExtension.class);
+
+            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> {
+                val testTaskName = getExtension(sourceSet, TestTaskNameExtension.class).getTestTaskName();
+                Callable<File> executionDataProvider = () -> {
+                    val testTask = project.getTasks().getByName(testTaskName);
+                    val testTaskJacoco = getExtension(testTask, JacocoTaskExtension.class);
+                    return testTaskJacoco.getDestinationFile();
+                };
+
+                project.getTasks().register(
+                    "jacoco" + capitalize(testTaskName) + "Report",
+                    JacocoReport.class,
+                    reportTask -> {
+                        reportTask.mustRunAfter(testTaskName);
+                        reportTask.setGroup(VERIFICATION_GROUP);
+                        reportTask.setDescription(format(
+                            "Generates code coverage report for the %s task.",
+                            testTaskName
+                        ));
+                        reportTask.executionData(executionDataProvider);
+                        reportTask.sourceSets(mainSourceSet);
+
+                        val reportsDir = jacoco.getReportsDirectory();
+                        reportTask.getReports().all(action(report -> {
+                            if (report.getOutputType().equals(DIRECTORY)) {
+                                report.setDestination(reportsDir.dir(
+                                    testTaskName + '/' + report.getName()
+                                ).map(Directory::getAsFile));
+                            } else {
+                                report.setDestination(reportsDir.dir(
+                                    testTaskName + "/" + reportTask.getName() + "." + report.getName()
+                                ).map(Directory::getAsFile));
+                            }
+                        }));
+                    }
+                );
+
+                project.getTasks().register(
+                    "jacoco" + capitalize(testTaskName) + "CoverageVerification",
+                    JacocoCoverageVerification.class,
+                    coverageVerificationTask -> {
+                        coverageVerificationTask.mustRunAfter(testTaskName);
+                        coverageVerificationTask.setGroup(VERIFICATION_GROUP);
+                        coverageVerificationTask.setDescription(format(
+                            "Verifies code coverage metrics based on specified rules for the %s task.",
+                            testTaskName
+                        ));
+                        coverageVerificationTask.executionData(executionDataProvider);
+                        coverageVerificationTask.sourceSets(mainSourceSet);
+                    }
+                );
+            });
+        });
+    }
+
+
     private static void configureIdea(Project project) {
         project.getPluginManager().withPlugin("idea", __ -> {
             val ideaModel = getExtension(project, IdeaModel.class);
@@ -216,7 +290,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val sourceSets = getExtension(project, SourceSetContainer.class);
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        testSourceSets.all(testSourceSet -> {
+        testSourceSets.all(testSourceSet ->
             project.getConfigurations().all(conf -> {
                 if (conf.getName().equals(testSourceSet.getCompileClasspathConfigurationName())
                     || conf.getName().equals(testSourceSet.getRuntimeClasspathConfigurationName())
@@ -225,8 +299,8 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                     val testPlusScope = testScope.computeIfAbsent("plus", key -> new ArrayList<>());
                     testPlusScope.add(conf);
                 }
-            });
-        });
+            })
+        );
 
         ConventionMapping moduleConvention = ((IConventionAware) module).getConventionMapping();
         moduleConvention.map("testSourceDirs", (Callable<Set<File>>) () ->
