@@ -87,6 +87,7 @@ allprojects {
                                 || it.name == 'allTests'
                                 || it instanceof AbstractTestTask
                                 || it instanceof VerificationTask
+                                || it instanceof ValidatePlugins
                         }
                     }
                     .toList()
