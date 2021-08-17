@@ -6,7 +6,6 @@ import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
 import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
-import static org.gradle.api.internal.lambdas.SerializableLambdas.action;
 import static org.gradle.api.reporting.Report.OutputType.DIRECTORY;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
@@ -41,7 +40,7 @@ abstract class TestSourceSetsConfigurerJacoco {
 
     private static void createJacocoReportTask(Project project, String testTaskName) {
         project.getTasks().register(
-            "jacoco" + capitalize((CharSequence) testTaskName) + "Report",
+            "jacoco" + capitalize(testTaskName) + "Report",
             JacocoReport.class,
             reportTask -> {
                 reportTask.mustRunAfter(testTaskName);
@@ -55,10 +54,11 @@ abstract class TestSourceSetsConfigurerJacoco {
                     .getByName(MAIN_SOURCE_SET_NAME)
                 );
 
-                reportTask.getReports().all(action(report -> {
+                val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
+                reportTask.getReports().all(report -> {
                     if (report.getOutputType().equals(DIRECTORY)) {
                         report.setDestination(project.provider(() -> {
-                            val reportsDir = getBaseJacocoReportsDir(project);
+                            val reportsDir = reportsDirProvider.call();
                             return new File(
                                 reportsDir,
                                 testTaskName + '/' + report.getName()
@@ -66,21 +66,21 @@ abstract class TestSourceSetsConfigurerJacoco {
                         }));
                     } else {
                         report.setDestination(project.provider(() -> {
-                            val reportsDir = getBaseJacocoReportsDir(project);
+                            val reportsDir = reportsDirProvider.call();
                             return new File(
                                 reportsDir,
                                 testTaskName + "/" + reportTask.getName() + "." + report.getName()
                             );
                         }));
                     }
-                }));
+                });
             }
         );
     }
 
     private static void createJacocoCoverageVerificationTask(Project project, String testTaskName) {
         project.getTasks().register(
-            "jacoco" + capitalize((CharSequence) testTaskName) + "CoverageVerification",
+            "jacoco" + capitalize(testTaskName) + "CoverageVerification",
             JacocoCoverageVerification.class,
             coverageVerificationTask -> {
                 coverageVerificationTask.mustRunAfter(testTaskName);
@@ -105,27 +105,29 @@ abstract class TestSourceSetsConfigurerJacoco {
         };
     }
 
-    private static File getBaseJacocoReportsDir(Project project) {
-        val jacoco = getExtension(project, JacocoPluginExtension.class);
-        val getReportsDirectory = findMethod(
-            classOf(jacoco),
-            DirectoryProperty.class,
-            "getReportsDirectory"
-        );
-        if (getReportsDirectory != null) {
-            return requireNonNull(getReportsDirectory.invoke(jacoco)).getAsFile().get();
-        }
+    private static Callable<File> createBaseJacocoReportsDirProvider(Project project) {
+        return () -> {
+            val jacoco = getExtension(project, JacocoPluginExtension.class);
+            val getReportsDirectory = findMethod(
+                classOf(jacoco),
+                DirectoryProperty.class,
+                "getReportsDirectory"
+            );
+            if (getReportsDirectory != null) {
+                return requireNonNull(getReportsDirectory.invoke(jacoco)).getAsFile().get();
+            }
 
-        val getReportsDir = findMethod(
-            classOf(jacoco),
-            File.class,
-            "getReportsDir"
-        );
-        if (getReportsDir != null) {
-            return requireNonNull(getReportsDir.invoke(jacoco));
-        }
+            val getReportsDir = findMethod(
+                classOf(jacoco),
+                File.class,
+                "getReportsDir"
+            );
+            if (getReportsDir != null) {
+                return requireNonNull(getReportsDir.invoke(jacoco));
+            }
 
-        throw new UnsupportedOperationException("Can't get Jacoco reports dir");
+            throw new UnsupportedOperationException("Can't get jacoco reports dir");
+        };
     }
 
 
