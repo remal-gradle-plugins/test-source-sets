@@ -1,10 +1,10 @@
 package name.remal.gradleplugins.testsourcesets;
 
 import static java.util.Arrays.asList;
+import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.PluginManagerUtils.withAnyOfPlugins;
 import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
-import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 
 import lombok.CustomLog;
@@ -14,7 +14,7 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 
 @CustomLog
-abstract class TestSourceSetsKotlinConfigurer {
+abstract class TestSourceSetsConfigurerKotlin {
 
     public static void configureKotlinTestSourceSets(Project project) {
         val kotlinPlugins = asList(
@@ -80,13 +80,8 @@ abstract class TestSourceSetsKotlinConfigurer {
         );
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Class<T> classOf(T object) {
-        return (Class<T>) unwrapGeneratedSubclass(object.getClass());
-    }
 
-
-    private TestSourceSetsKotlinConfigurer() {
+    private TestSourceSetsConfigurerKotlin() {
     }
 
 }
