@@ -5,7 +5,7 @@ buildscript {
         classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2.2.0'
         classpath 'com.gradle.publish:plugin-publish-plugin:0.15.0'
         classpath 'gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.0.1'
-        classpath 'name.remal:gradle-plugins:1.4.1'
+        classpath 'name.remal:gradle-plugins:1.5.0'
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2'
     }
