@@ -1,6 +1,6 @@
 allprojects {
     configurations.create('projectDependencyConstraints') { Configuration conf ->
-        String mockitoVersion = '3.12.3'
+        String mockitoVersion = '3.12.4'
 
         conf.dependencies.addAll(
             [
