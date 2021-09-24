@@ -256,7 +256,7 @@ jobs:
     steps:
     - name: Parse Git tag
       id: parse-git-tag
-      uses: actions/github-script@v4
+      uses: actions/github-script@v5
       with:
         script: |
           const tagName = context.payload.ref.replace(/^refs\/tags\//, '')
