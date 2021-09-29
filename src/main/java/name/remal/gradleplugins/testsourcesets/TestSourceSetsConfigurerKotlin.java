@@ -1,6 +1,7 @@
 package name.remal.gradleplugins.testsourcesets;
 
 import static java.util.Arrays.asList;
+import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.PluginManagerUtils.withAnyOfPlugins;
@@ -8,12 +9,14 @@ import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMeth
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 
 import lombok.CustomLog;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 
 @CustomLog
+@NoArgsConstructor(access = PRIVATE)
 abstract class TestSourceSetsConfigurerKotlin {
 
     public static void configureKotlinTestSourceSets(Project project) {
@@ -78,10 +81,6 @@ abstract class TestSourceSetsConfigurerKotlin {
                 associateWith.invoke(compilation, mainCompilation)
             )
         );
-    }
-
-
-    private TestSourceSetsConfigurerKotlin() {
     }
 
 }

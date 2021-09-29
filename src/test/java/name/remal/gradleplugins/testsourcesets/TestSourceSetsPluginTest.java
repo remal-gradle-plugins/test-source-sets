@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.findExtension;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradleplugins.toolkit.testkit.ProjectAfterEvaluateActionsExecutor.executeAfterEvaluateActions;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -349,6 +350,7 @@ class TestSourceSetsPluginTest {
 
         {
             project.getPluginManager().apply("idea");
+            executeAfterEvaluateActions(project);
         }
 
         @Test

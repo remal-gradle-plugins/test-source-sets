@@ -2,6 +2,7 @@ package name.remal.gradleplugins.testsourcesets;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
@@ -13,6 +14,7 @@ import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
@@ -22,6 +24,7 @@ import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
 import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
 
+@NoArgsConstructor(access = PRIVATE)
 abstract class TestSourceSetsConfigurerJacoco {
 
     public static void configureJacoco(Project project) {
@@ -128,10 +131,6 @@ abstract class TestSourceSetsConfigurerJacoco {
 
             throw new UnsupportedOperationException("Can't get jacoco reports dir");
         };
-    }
-
-
-    private TestSourceSetsConfigurerJacoco() {
     }
 
 }
