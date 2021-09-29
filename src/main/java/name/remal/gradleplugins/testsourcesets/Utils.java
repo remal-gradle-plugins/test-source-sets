@@ -53,11 +53,8 @@ interface Utils {
         Consumer<Set<E>> action
     ) {
         Set<E> set = new LinkedHashSet<>();
-        if (map.containsKey(key)) {
-            for (val element : map.get(key)) {
-                set.add(element);
-            }
-        }
+        Optional.ofNullable(map.get(key))
+            .ifPresent(it -> it.forEach(set::add));
 
         action.accept(set);
 
