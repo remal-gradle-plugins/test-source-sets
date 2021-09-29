@@ -13,7 +13,7 @@ allprojects {
             [
                 // Static analysis
                 'com.google.code.findbugs:jsr305:3.0.2',
-                'org.jetbrains:annotations:20.1.0',
+                'org.jetbrains:annotations:22.0.0',
                 'com.google.errorprone:error_prone_annotations:2.9.0',
                 'com.google.errorprone:error_prone_core:2.9.0',
 
