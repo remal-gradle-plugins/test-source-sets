@@ -31,22 +31,22 @@ jobs:
     timeout-minutes: 30
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Validate Gradle Wrapper
-      uses: gradle/wrapper-validation-action@v1
+      uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b # tag=v1
     - name: Cache
       id: cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/wrapper/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
@@ -65,24 +65,24 @@ jobs:
       gradle-versions: ${{steps.gradle-versions.outputs.unstableMinors}}
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
     - name: Retrieve repository info
       id: repository-info
-      uses: remal-github-actions/retrieve-repository-info@v1
+      uses: remal-github-actions/retrieve-repository-info@c0e81eb54e4c89b2bbb7fb522869299ce8a097ac # tag=v1
     - name: Set repository info environment variables
       env:
         REPOSITORY_NAME: ${{fromJSON(steps.repository-info.outputs.result).name}}
@@ -115,20 +115,20 @@ jobs:
       run: |
         tar -cz -f "/tmp/workspace-${{github.run_id}}.tar.gz" `git ls-files -m -o`
     - name: Upload workspace archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # tag=v2
       with:
         name: workspace
         path: '/tmp/workspace-${{github.run_id}}.tar.gz'
         if-no-files-found: error
     - name: Read min supported Gradle version
       id: min-gradle-version
-      uses: remal-github-actions/read-property@v1
+      uses: remal-github-actions/read-property@acacf7c2fd6dc6079fd6c8fc6d4f37298084908f # tag=v1
       with:
         file: gradle.properties
         property: 'gradle-api.min-version'
     - name: Retrieve Gradle versions for testing
       id: gradle-versions
-      uses: remal-github-actions/retrieve-maven-artifact-versions@v1
+      uses: remal-github-actions/retrieve-maven-artifact-versions@0970b1315ea2997aa532455d6b05952644462352 # tag=v1
       with:
         group: name.remal.gradle-api
         name: gradle-api
@@ -151,24 +151,24 @@ jobs:
         gradle-version: ${{fromJSON(needs.build.outputs.gradle-versions)}}
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
     - name: Download workspace archive
       id: download-workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@f023be2c48cc18debc3bacd34cb396e0295e2869 # tag=v2
       with:
         name: workspace
         path: /tmp
@@ -203,24 +203,24 @@ jobs:
       DISABLE_VERIFICATION: 'true'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
     - name: Download workspace archive
       id: download-workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@f023be2c48cc18debc3bacd34cb396e0295e2869 # tag=v2
       with:
         name: workspace
         path: /tmp
@@ -240,7 +240,7 @@ jobs:
       env:
         PUSH_BACK_TOKEN: ${{secrets.PUSH_BACK_TOKEN}}
       if: ${{env.PUSH_BACK_TOKEN && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')}}
-      uses: remal-github-actions/push-back@v1
+      uses: remal-github-actions/push-back@3ad8fb7d2a0d4ab53ea5b1c22138d5d9869f803b # tag=v1
       with:
         githubToken: ${{env.PUSH_BACK_TOKEN}}
         message: '[push-back] Push-back updated files during build'
@@ -256,7 +256,7 @@ jobs:
     steps:
     - name: Parse Git tag
       id: parse-git-tag
-      uses: actions/github-script@v5
+      uses: actions/github-script@e3cbab99d3a9b271e1b79fc96d103a4a5534998c # tag=v5
       with:
         script: |
           const tagName = context.payload.ref.replace(/^refs\/tags\//, '')
@@ -295,24 +295,24 @@ jobs:
       DISABLE_VERIFICATION: 'true'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
     - name: Download workspace archive
       id: download-workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@f023be2c48cc18debc3bacd34cb396e0295e2869 # tag=v2
       with:
         name: workspace
         path: /tmp
@@ -333,24 +333,24 @@ jobs:
       DISABLE_VERIFICATION: 'true'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2
       with:
         submodules: recursive
         fetch-depth: 1
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # tag=v2
       with:
         key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
         path: |
           ~/.gradle
     - name: Setup Java 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@f0bb91606209742fe3ea40199be2f3ef195ecabf # tag=v2
       with:
         java-version: 11
         distribution: zulu
     - name: Download workspace archive
       id: download-workspace
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@f023be2c48cc18debc3bacd34cb396e0295e2869 # tag=v2
       with:
         name: workspace
         path: /tmp
