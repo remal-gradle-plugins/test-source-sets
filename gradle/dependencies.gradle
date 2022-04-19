@@ -18,7 +18,7 @@ allprojects {
                 'com.google.errorprone:error_prone_core:2.13.1',
 
                 // Annotation processing
-                'org.projectlombok:lombok:1.18.22',
+                'org.projectlombok:lombok:1.18.24',
 
                 // Compile-only
                 'name.remal:gradle-plugins-api:1.5.1',
