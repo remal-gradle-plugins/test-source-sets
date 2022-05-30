@@ -4,7 +4,7 @@ allprojects {
     configurations.named('projectDependencyConstraints') { Configuration conf ->
         conf.dependencyConstraints.addAll(
             [
-                'com.puppycrawl.tools:checkstyle:10.2',
+                'com.puppycrawl.tools:checkstyle:10.3',
             ].collect { project.dependencies.constraints.create(it) }
         )
     }
