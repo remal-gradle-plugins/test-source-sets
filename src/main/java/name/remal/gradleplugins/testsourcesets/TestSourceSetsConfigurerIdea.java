@@ -19,14 +19,22 @@ abstract class TestSourceSetsConfigurerIdea {
 
     public static void configureIdea(Project project) {
         project.getPluginManager().withPlugin("idea", __ -> {
-            project.afterEvaluate(___ -> {
-                val ideaModel = getExtension(project, IdeaModel.class);
-                val module = ideaModel.getModule();
-                if (module != null) {
-                    configureIdeaModule(project, module);
-                }
-            });
+            if (project.getState().getExecuted()) {
+                configureIdeaImpl(project);
+            } else {
+                project.afterEvaluate(___ -> {
+                    configureIdeaImpl(project);
+                });
+            }
         });
+    }
+
+    private static void configureIdeaImpl(Project project) {
+        val ideaModel = getExtension(project, IdeaModel.class);
+        val module = ideaModel.getModule();
+        if (module != null) {
+            configureIdeaModule(project, module);
+        }
     }
 
     private static void configureIdeaModule(Project project, IdeaModule module) {
