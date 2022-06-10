@@ -2,7 +2,7 @@
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2.2.1'
+        classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2.2.2'
         classpath 'com.gradle.publish:plugin-publish-plugin:0.21.0'
         classpath 'gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4'
         classpath 'name.remal:gradle-plugins:1.5.1'
