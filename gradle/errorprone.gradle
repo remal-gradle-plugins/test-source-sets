@@ -13,6 +13,7 @@ allprojects {
                 disableWarningsInGeneratedCode = true
                 disable(
                     'JavaxInjectOnAbstractMethod', // false positives with Gradle
+                    'InjectOnConstructorOfAbstractClass', // false positives with Gradle
                     'SameNameButDifferent', // false positives with lombok.val
                 )
 
