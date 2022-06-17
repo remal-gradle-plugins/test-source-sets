@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradleplugins.toolkit.ReportUtils.setReportDestination;
 import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
 import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
 import static org.gradle.api.reporting.Report.OutputType.DIRECTORY;
@@ -59,23 +60,16 @@ abstract class TestSourceSetsConfigurerJacoco {
 
                 val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
                 task.getReports().all(report -> {
-                    if (report.getOutputType().equals(DIRECTORY)) {
-                        report.setDestination(project.provider(() -> {
-                            val reportsDir = reportsDirProvider.call();
-                            return new File(
-                                reportsDir,
-                                testTaskName + '/' + report.getName()
-                            );
-                        }));
-                    } else {
-                        report.setDestination(project.provider(() -> {
-                            val reportsDir = reportsDirProvider.call();
-                            return new File(
-                                reportsDir,
-                                testTaskName + "/" + task.getName() + "." + report.getName()
-                            );
-                        }));
-                    }
+                    setReportDestination(report, project.provider(() -> {
+                        val reportsDir = reportsDirProvider.call();
+                        val taskReportsDir = new File(reportsDir, testTaskName);
+                        return new File(
+                            taskReportsDir,
+                            report.getOutputType().equals(DIRECTORY)
+                                ? report.getName()
+                                : task.getName() + "." + report.getName()
+                        );
+                    }));
                 });
             }
         );

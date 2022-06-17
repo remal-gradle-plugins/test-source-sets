@@ -4,7 +4,7 @@ allprojects {
 
         conf.dependencies.addAll(
             [
-                'name.remal.gradle-plugins.toolkit:toolkit-bom:0.10.0',
+                'name.remal.gradle-plugins.toolkit:toolkit-bom:0.11.0',
                 'org.junit:junit-bom:5.8.2',
             ].collect { project.dependencies.platform(it) }
         )

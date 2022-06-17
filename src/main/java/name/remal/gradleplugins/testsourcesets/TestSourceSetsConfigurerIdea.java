@@ -5,6 +5,7 @@ import static name.remal.gradleplugins.testsourcesets.Utils.adjustMapProperty;
 import static name.remal.gradleplugins.testsourcesets.Utils.adjustMapSetValue;
 import static name.remal.gradleplugins.testsourcesets.Utils.adjustSetProperty;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradleplugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -19,13 +20,7 @@ abstract class TestSourceSetsConfigurerIdea {
 
     public static void configureIdea(Project project) {
         project.getPluginManager().withPlugin("idea", __ -> {
-            if (project.getState().getExecuted()) {
-                configureIdeaImpl(project);
-            } else {
-                project.afterEvaluate(___ -> {
-                    configureIdeaImpl(project);
-                });
-            }
+            afterEvaluateOrNow(project, ___ -> configureIdeaImpl(project));
         });
     }
 
