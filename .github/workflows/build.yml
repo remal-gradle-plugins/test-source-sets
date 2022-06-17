@@ -115,7 +115,7 @@ jobs:
       run: |
         tar -cz -f "/tmp/workspace-${{github.run_id}}.tar.gz" `git ls-files -m -o`
     - name: Upload workspace archive
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: workspace
         path: '/tmp/workspace-${{github.run_id}}.tar.gz'
