@@ -14,11 +14,11 @@ import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
@@ -61,7 +61,7 @@ abstract class TestSourceSetsConfigurerJacoco {
                 val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
                 task.getReports().all(report -> {
                     setReportDestination(report, project.provider(() -> {
-                        val reportsDir = reportsDirProvider.call();
+                        val reportsDir = reportsDirProvider.get();
                         val taskReportsDir = new File(reportsDir, testTaskName);
                         return new File(
                             taskReportsDir,
@@ -94,16 +94,16 @@ abstract class TestSourceSetsConfigurerJacoco {
         );
     }
 
-    private static Callable<File> createExecutionDataProvider(Project project, String testTaskName) {
-        return () -> {
+    private static Provider<File> createExecutionDataProvider(Project project, String testTaskName) {
+        return project.provider(() -> {
             val testTask = project.getTasks().getByName(testTaskName);
             val testTaskJacoco = getExtension(testTask, JacocoTaskExtension.class);
             return testTaskJacoco.getDestinationFile();
-        };
+        });
     }
 
-    private static Callable<File> createBaseJacocoReportsDirProvider(Project project) {
-        return () -> {
+    private static Provider<File> createBaseJacocoReportsDirProvider(Project project) {
+        return project.provider(() -> {
             val jacoco = getExtension(project, JacocoPluginExtension.class);
             val getReportsDirectory = findMethod(
                 classOf(jacoco),
@@ -120,11 +120,11 @@ abstract class TestSourceSetsConfigurerJacoco {
                 "getReportsDir"
             );
             if (getReportsDir != null) {
-                return requireNonNull(getReportsDir.invoke(jacoco));
+                return getReportsDir.invoke(jacoco);
             }
 
-            throw new UnsupportedOperationException("Can't get jacoco reports dir");
-        };
+            throw new UnsupportedOperationException("Can't get Jacoco reports dir");
+        });
     }
 
 }
