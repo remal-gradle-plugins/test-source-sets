@@ -12,7 +12,8 @@ allprojects {
             options.errorprone {
                 disableWarningsInGeneratedCode = true
                 disable(
-                    'SameNameButDifferent' // false positives with lombok.val
+                    'JavaxInjectOnAbstractMethod', // false positives with Gradle
+                    'SameNameButDifferent', // false positives with lombok.val
                 )
 
                 option('NullAway:AnnotatedPackages', project.property('baseJavaPackage').toString())
