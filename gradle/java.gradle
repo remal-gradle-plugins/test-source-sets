@@ -139,6 +139,19 @@ allprojects {
             }
         }
 
+        testSourceSets.configureEach { SourceSet testSourceSet ->
+            Set<String> testCompileTaskNames = [
+                'java',
+                'kotlin',
+                'groovy',
+                'scala',
+            ].collect { testSourceSet.getCompileTaskName(it) }.toSet()
+            tasks.withType(AbstractCompile).matching { testCompileTaskNames.contains(it.name) }.configureEach { AbstractCompile task ->
+                task.sourceCompatibility = JavaVersion.VERSION_17.toString()
+                task.targetCompatibility = sourceCompatibility.toString()
+            }
+        }
+
         tasks.withType(Test) {
             useJUnitPlatform()
             systemProperty('junit.jupiter.extensions.autodetection.enabled', 'true')
