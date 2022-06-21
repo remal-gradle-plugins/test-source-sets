@@ -18,7 +18,7 @@ After executing it, `sourceSets` will contain these source sets:
 
 * `main`
 * `test`
-* `integration` (this source set is added here, because creation of test source sets is done by delegating it to `sourceSets`)
+* `integration` (this source set is added here, because creation of test source sets is done by delegating it to `sourceSet` extension)
 
 And `testSourceSets` will contain these source sets:
 
