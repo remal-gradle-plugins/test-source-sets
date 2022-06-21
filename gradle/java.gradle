@@ -150,7 +150,7 @@ allprojects {
                 'scala',
             ].collect { testSourceSet.getCompileTaskName(it) }.toSet()
             tasks.withType(AbstractCompile).matching { testCompileTaskNames.contains(it.name) }.configureEach { AbstractCompile task ->
-                task.sourceCompatibility = JavaVersion.VERSION_17.toString()
+                task.sourceCompatibility = JavaVersion.VERSION_11.toString()
                 task.targetCompatibility = sourceCompatibility.toString()
             }
         }
