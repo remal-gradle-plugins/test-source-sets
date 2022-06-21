@@ -2,14 +2,14 @@
 
 # `name.remal.test-source-sets` plugin
 
-A Gradle plugin that provides `testSourceSet` extension for creating new source sets for testing. For all created source sets a [Test](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/Test.html) task is created. All dependencies are inherited from `test` source set.
+A Gradle plugin that provides `testSourceSets` extension for creating new source sets for testing. For all created source sets a [Test](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/Test.html) task is created. All dependencies are inherited from `test` source set.
 
-## `testSourceSet` extension
+## `testSourceSets` extension
 
-`testSourceSet` extension is very similar to [`sourceSet` extension on Gradle Java plugin](https://docs.gradle.org/current/userguide/java_plugin.html#source_sets). It can be used in exactly the same way. A new source set `integration` for integration tests can be defined like this:
+`testSourceSets` extension is very similar to [`sourceSet` extension on Gradle Java plugin](https://docs.gradle.org/current/userguide/java_plugin.html#source_sets). It can be used in exactly the same way. A new source set `integration` for integration tests can be defined like this:
 
 ```groovy
-testSourceSet {
+testSourceSets {
   integration
 }
 ```
@@ -20,7 +20,7 @@ After executing it, `sourceSets` will contain these source sets:
 * `test`
 * `integration` (this source set is added here, because creation of test source sets is done by delegating it to `sourceSets`)
 
-And `testSourceSet` will contain these source sets:
+And `testSourceSets` will contain these source sets:
 
 * `test`
 * `integration`
@@ -32,7 +32,7 @@ All configurations of test source sets extend corresponding configurations of `t
 So, after defining `integration` test source set:
 
 ```groovy
-testSourceSet {
+testSourceSets {
   integration
 }
 ```
@@ -65,7 +65,7 @@ A task named `allTests` is created by the plugin. This task simply depends on [T
 A special extension is added to all test source set, that provides `getTestTaskName()` method. This method can be used like this:
 
 ```groovy
-testSourceSet.configureEach { sourceSet ->
+testSourceSets.configureEach { sourceSet ->
   String testTaskName = sourceSet.testTaskName
   println testTaskName // print corresponding Test task name
 }
