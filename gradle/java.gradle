@@ -130,7 +130,7 @@ allprojects {
 
         tasks.matching { it instanceof JavaForkOptions }.all {
             List<String> jvmArgs = it.jvmArgs
-            if (JavaVersion.current() < JavaVersion.VERSION_17) {
+            if (JavaVersion.VERSION_1_9 <= JavaVersion.current() && JavaVersion.current() <= JavaVersion.VERSION_16) {
                 jvmArgs += '--illegal-access=deny'
             }
             it.jvmArgs = jvmArgs
