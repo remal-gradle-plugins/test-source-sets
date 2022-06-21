@@ -1,12 +1,11 @@
 allprojects {
     configurations.create('projectDependencyConstraints') { Configuration conf ->
-        String mockitoVersion = '4.6.1'
-
         conf.dependencies.addAll(
             [
                 'name.remal.gradle-plugins.toolkit:toolkit-bom:0.23.0',
                 'org.ow2.asm:asm-bom:9.3',
                 'org.junit:junit-bom:5.8.2',
+                'org.mockito:mockito-bom:4.6.1',
             ].collect { project.dependencies.platform(it) }
         )
 
@@ -30,9 +29,6 @@ allprojects {
 
                 // Test
                 "name.remal.gradle-api:gradle-test-kit:${property('gradle-api.version')}",
-                "org.mockito:mockito-core:$mockitoVersion",
-                "org.mockito:mockito-inline:$mockitoVersion",
-                "org.mockito:mockito-junit-jupiter:$mockitoVersion",
                 'org.assertj:assertj-core:3.23.1',
             ].collect {
                 project.dependencies.constraints.create(it) { DependencyConstraint constraint ->
