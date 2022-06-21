@@ -11,7 +11,7 @@ allprojects {
                     String relativePath = details.relativePath.toString()
                     String className = relativePath.replaceFirst(/\.class$/, '').replace('/', '.')
                     throw new GradleException(
-                        "Class name doesn't start with base Java package '${baseJavaPackage}.': ${className}"
+                        "Class name doesn't start with base Java package '${baseJavaPackage}': ${className}"
                     )
                 }
         }
