@@ -26,5 +26,19 @@ allprojects {
                 }
             }
         }
+
+        pluginManager.withPlugin('name.remal.generate-sources') {
+            tasks.matching { it.name == 'publishPluginJar' }.configureEach {
+                Set<String> generateTasks = [
+                    'generateResources',
+                    'generateJava',
+                    'generateKotlin',
+                    'generateGroovy',
+                ].toSet()
+                dependsOn(
+                    tasks.matching { generateTasks.contains(it.name) }
+                )
+            }
+        }
     }
 }

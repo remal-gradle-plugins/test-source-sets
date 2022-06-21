@@ -1,0 +1,31 @@
+name: Bump repository activity
+
+on:
+  schedule:
+  - cron: '0 2 * * 1'
+  push:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/bump-repository-activity.yml'
+  workflow_dispatch: { }
+
+jobs:
+  bump-repository-activity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: 'false'
+        lfs: 'false'
+        fetch-depth: 1
+    - name: Update repository-activity.bumper
+      run: |
+        date > "repository-activity.bumper"
+    - name: Push back
+      uses: remal-github-actions/push-back@v1
+      with:
+        githubToken: ${{ secrets.PUSH_BACK_TOKEN }}
+        message: '[push-back] Bump repository activity'

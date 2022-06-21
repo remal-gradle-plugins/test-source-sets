@@ -22,7 +22,7 @@ allprojects {
             value = System.getProperty(name)
         }
         if (value == null) {
-            String envName = name.replaceAll(/[^\w]/, '_').toUpperCase()
+            String envName = name.replaceAll(/\W/, '_').toUpperCase()
             value = System.getenv(envName)
         }
 
@@ -40,52 +40,53 @@ allprojects {
         }
     }
 
-    ext['git-ref'] = getCiProperty('git-ref', '')
+    project.ext['git-ref'] = getCiProperty('git-ref', '')
 
-    ext['gradle-api.version'] = getCiProperty('gradle-api.version', GradleVersion.current().version)
+    project.ext['gradle-api.version'] = getCiProperty('gradle-api.version', GradleVersion.current().version)
 
-    ext['disable-compilation'] = getCiProperty('disable-compilation', 'false')
-    ext['disable-tests'] = getCiProperty('disable-tests', 'false')
-    ext['disable-verification'] = getCiProperty('disable-verification', 'false')
-    ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
+    project.ext['disable-compilation'] = getCiProperty('disable-compilation', 'false')
+    project.ext['disable-tests'] = getCiProperty('disable-tests', 'false')
+    project.ext['disable-verification'] = getCiProperty('disable-verification', 'false')
+    project.ext['disable-verification-except-tests'] = getCiProperty('disable-verification-except-tests', 'false')
 
-    ext['repository-name'] = getCiProperty('repository-name', '', true)
-    ext['repository-full-name'] = getCiProperty('repository-full-name', '', true)
-    ext['repository-html-url'] = getCiProperty('repository-html-url', '', true)
-    ext['repository-description'] = getCiProperty('repository-description', '', true)
-    ext['repository-topics'] = getCiProperty('repository-topics', '', true)
-    ext['repository-is-template'] = getCiProperty('repository-is-template', '', true)
-    ext['repository-owner-name'] = getCiProperty('repository-owner-name', '', true)
-    ext['repository-license-name'] = getCiProperty('repository-license-name', '', true)
-    ext['repository-license-html-url'] = getCiProperty('repository-license-html-url', '', true)
+    project.ext['repository-name'] = getCiProperty('repository-name', '', true)
+    project.ext['repository-full-name'] = getCiProperty('repository-full-name', '', true)
+    project.ext['repository-html-url'] = getCiProperty('repository-html-url', '', true)
+    project.ext['repository-description'] = getCiProperty('repository-description', '', true)
+    project.ext['repository-topics'] = getCiProperty('repository-topics', '', true)
+    project.ext['repository-is-template'] = getCiProperty('repository-is-template', '', true)
+    project.ext['repository-owner-name'] = getCiProperty('repository-owner-name', '', true)
+    project.ext['repository-license-name'] = getCiProperty('repository-license-name', '', true)
+    project.ext['repository-license-html-url'] = getCiProperty('repository-license-html-url', '', true)
 
 
-    File rootProjectDir = file(rootDir)
+    File rootProjectDir = file(project.rootDir)
     if (rootProjectDir.name == 'buildSrc') rootProjectDir = rootProjectDir.parentFile
-    ext['rootProjectDir'] = rootProjectDir
+    project.ext['rootProjectDir'] = rootProjectDir
 
     String currentVersion = project.version.toString()
     if (currentVersion.matches(/^(0|[1-9]\d*)(\D.*)?$/)) {
-        ext['majorVersion'] = currentVersion.replaceFirst(/^(\d+).*/, '$1')
+        project.ext['majorVersion'] = currentVersion.replaceFirst(/^(\d+).*/, '$1')
     }
 
     String rootPackage = rootProject.group
     if (!rootPackage.endsWith(".${rootProject.name}")) {
         rootPackage += ".${rootProject.name}"
     }
-    ext['baseJavaPackage'] = "${rootPackage}${project.path}"
+    String baseJavaPackage = "${rootPackage}${project.path}"
         .replace(':', '.')
         .replaceAll(/\.{2,}/, '.')
         .replaceFirst(/\.+$/, '')
         .replaceAll(/[^\w.]/, '')
-
-    String rootJavaModuleName = rootProject.group
-    if (!rootJavaModuleName.endsWith(".${rootProject.name}")) {
-        rootJavaModuleName += ".${rootProject.name}"
+    List<String> baseJavaPackageTokens = baseJavaPackage.split(/\./)
+    for (int i = baseJavaPackageTokens.size() - 1; 1 <= i; --i) {
+        String prefix = baseJavaPackageTokens[i - 1]
+        String current = baseJavaPackageTokens[i]
+        if (current.startsWith(prefix)) {
+            baseJavaPackageTokens[i] = current.substring(prefix.length())
+        }
     }
-    ext['javaModuleName'] = "${rootJavaModuleName}${project.path}"
-        .replace(':', '.')
-        .replaceAll(/\.{2,}/, '.')
-        .replaceFirst(/\.+$/, '')
-        .replaceAll(/[^\w.]/, '')
+    baseJavaPackage = baseJavaPackageTokens.join('.')
+    project.ext['baseJavaPackage'] = baseJavaPackage
+    project.ext['javaModuleName'] = baseJavaPackage
 }
