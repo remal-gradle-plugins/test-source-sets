@@ -14,7 +14,15 @@ allprojects {
                 disable(
                     'JavaxInjectOnAbstractMethod', // false positives with Gradle
                     'InjectOnConstructorOfAbstractClass', // false positives with Gradle
+                    'MissingSummary', // we don't write JavaDocs everywhere
+                    'DoNotCallSuggester', // we don't need this check
+                    'Slf4jFormatShouldBeConst', // too strict rule
+                    'UnusedVariable', // buggy and annoying
+                    'ClassCanBeStatic', // false-positive with @org.junit.jupiter.api.Nested: https://github.com/google/error-prone/issues/956
                     'SameNameButDifferent', // false positives with lombok.val
+                    'ParameterName', // false positives with Lombok
+                    'MissingOverride', // false positives with Lombok
+                    'BugPatternNaming', // too strict rule
                 )
 
                 option('NullAway:AnnotatedPackages', project.property('baseJavaPackage').toString())
