@@ -22,7 +22,7 @@ allprojects {
                 'org.projectlombok:lombok:1.18.24',
 
                 // Compile-only
-                'name.remal:gradle-plugins-api:1.5.1',
+                'name.remal:gradle-plugins-api:1.6.0',
 
                 // Compile
                 "name.remal.gradle-api:local-groovy:${property('gradle-api.version')}",
