@@ -45,7 +45,7 @@ allprojects {
             'Dependency constraints'
         )
 
-        configurations.matching { it !== conf }.configureEach { extendsFrom(conf) }
+        configurations.matching { it != conf }.configureEach { extendsFrom(conf) }
     }
 
     configurations.all {
