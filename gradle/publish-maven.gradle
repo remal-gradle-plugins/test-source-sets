@@ -83,11 +83,13 @@ allprojects {
                     .collect { it.tasks }
                     .collect {
                         it.matching {
-                            it.name == 'build'
-                                || it.name == 'allTests'
-                                || it instanceof AbstractTestTask
-                                || it instanceof VerificationTask
-                                || it instanceof ValidatePlugins
+                            (
+                                it.name == 'build'
+                                    || it.name == 'allTests'
+                                    || it instanceof AbstractTestTask
+                                    || it instanceof VerificationTask
+                                    || it instanceof ValidatePlugins
+                            )
                         }
                     }
                     .toList()
