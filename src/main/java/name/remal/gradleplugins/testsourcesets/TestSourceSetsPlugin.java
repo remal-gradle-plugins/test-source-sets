@@ -1,7 +1,5 @@
 package name.remal.gradleplugins.testsourcesets;
 
-import static java.lang.System.identityHashCode;
-import static java.lang.reflect.Proxy.newProxyInstance;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradleplugins.testsourcesets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradleplugins.testsourcesets.TestSourceSetsConfigurerJacoco.configureJacoco;
@@ -10,16 +8,20 @@ import static name.remal.gradleplugins.testsourcesets.TestTaskNameExtension.getT
 import static name.remal.gradleplugins.toolkit.ConventionUtils.addConventionPlugin;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.createExtension;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
-import static name.remal.gradleplugins.toolkit.SneakyThrowUtils.sneakyThrows;
+import static name.remal.gradleplugins.toolkit.ProxyUtils.toDynamicInterface;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP;
 
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import lombok.val;
 import name.remal.gradleplugins.testsourcesets.internal.DefaultTestTaskNameExtension;
 import org.gradle.api.Plugin;
@@ -70,55 +72,53 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         sourceSets.whenObjectRemoved(container::remove);
         container.whenObjectRemoved(sourceSets::remove);
 
-        return (TestSourceSetContainer) newProxyInstance(
-            TestSourceSetContainer.class.getClassLoader(),
-            new Class<?>[]{TestSourceSetContainer.class},
-            (proxy, method, args) -> {
-                if (method.getParameterTypes().length == 1 && method.getName().equals("equals")) {
-                    return proxy == args[0];
-                } else if (method.getParameterTypes().length == 0 && method.getName().equals("hashCode")) {
-                    return identityHashCode(proxy);
-                }
-
-                return method.invoke(container, args);
-            }
-        );
+        return toDynamicInterface(container, TestSourceSetContainer.class);
     }
 
 
-    private static final Pattern GET_CONFIGURATION_NAME_METHOD_NAME = Pattern.compile(
-        "^get[A-Z].*[a-z]ConfigurationName$"
-    );
-
     private static void configureConfigurations(Project project) {
-        val configurationNameMethods = Stream.of(SourceSet.class.getMethods())
-            .filter(it -> GET_CONFIGURATION_NAME_METHOD_NAME.matcher(it.getName()).matches())
-            .collect(toList());
-
         val configurations = project.getConfigurations();
 
         val testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> sneakyThrows(() -> {
-            for (val method : configurationNameMethods) {
-                val testConfigurationName = method.invoke(testSourceSet);
-                val configurationName = method.invoke(sourceSet);
-                if (testConfigurationName == null
-                    || configurationName == null
-                    || Objects.equals(testConfigurationName, configurationName)
-                ) {
-                    continue;
-                }
-
+        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet ->
+            forConfigurations(testSourceSet, sourceSet, (testConfigurationName, configurationName) -> {
                 configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration ->
                     configurations.matching(it -> it.getName().equals(configurationName)).all(configuration ->
                         configuration.extendsFrom(testConfiguration)
                     )
                 );
-            }
-        }));
+            })
+        );
     }
 
+    private static final Pattern GET_CONFIGURATION_NAME_METHOD_NAME = Pattern.compile(
+        "^get[A-Z].*[a-z]ConfigurationName$"
+    );
+
+    private static final List<Method> GET_CONFIGURATION_NAME_METHODS = Stream.of(SourceSet.class.getMethods())
+        .filter(it -> GET_CONFIGURATION_NAME_METHOD_NAME.matcher(it.getName()).matches())
+        .collect(toList());
+
+    @SneakyThrows
+    private static void forConfigurations(
+        SourceSet sourceSet1,
+        SourceSet sourceSet2,
+        BiConsumer<String, String> action
+    ) {
+        for (val method : GET_CONFIGURATION_NAME_METHODS) {
+            val configurationName1 = method.invoke(sourceSet1);
+            val configurationName2 = method.invoke(sourceSet2);
+            if (configurationName1 == null
+                || configurationName2 == null
+                || Objects.equals(configurationName1, configurationName2)
+            ) {
+                continue;
+            }
+
+            action.accept(configurationName1.toString(), configurationName2.toString());
+        }
+    }
 
     private static void configureClasspaths(Project project) {
         val sourceSets = getExtension(project, SourceSetContainer.class);
