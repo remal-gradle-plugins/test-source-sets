@@ -30,4 +30,5 @@ jobs:
         githubToken: '${{ env.PUSH_BACK_TOKEN }}'
         templateRepository: '${{ secrets.TEMPLATE_REPOSITORY }}'
         ignorePaths: |
+          gradle/dependencies.gradle
           repository-activity.bumper
