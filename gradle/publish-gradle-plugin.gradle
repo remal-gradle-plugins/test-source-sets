@@ -8,7 +8,7 @@ allprojects {
             it.tags = property('repository-topics').toString().split(/,/)
                 .collect { it.trim().toLowerCase() }
                 .findAll { !it.isEmpty() }
-                .findAll { it != 'gradle' && it != 'plugin' }
+                .findAll { it != 'gradle' && it != 'plugin' && it != 'gradle-plugin' }
         }
 
         pluginManager.withPlugin('maven-publish') {
