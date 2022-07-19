@@ -156,6 +156,14 @@ allprojects {
         }
 
         tasks.withType(Test) {
+            if (name == 'test') {
+                /*
+                 * Required for `org.gradle.testfixtures.ProjectBuilder`.
+                 * See https://github.com/gradle/gradle/issues/18647
+                 */
+                jvmArgs('--add-opens=java.base/java.lang=ALL-UNNAMED')
+            }
+
             useJUnitPlatform()
             systemProperty('junit.jupiter.extensions.autodetection.enabled', 'true')
             enableAssertions = true
