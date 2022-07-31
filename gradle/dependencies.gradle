@@ -2,7 +2,7 @@ allprojects {
     configurations.create('projectDependencyConstraints') { Configuration conf ->
         conf.dependencies.addAll(
             [
-                'name.remal.gradle-plugins.toolkit:toolkit-bom:0.25.0',
+                'name.remal.gradle-plugins.toolkit:toolkit-bom:0.26.0',
                 'org.ow2.asm:asm-bom:9.3',
                 'org.junit:junit-bom:5.9.0',
                 'org.mockito:mockito-bom:4.6.1',
