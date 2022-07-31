@@ -11,6 +11,13 @@ idea.project {
     languageLevel = new IdeaLanguageLevel(targetBytecodeVersion.majorVersion)
 }
 
+ideaSettings {
+  nullability {
+    defaultNotNullAnnotation = 'javax.annotation.Nonnull'
+    defaultNullableAnnotation = 'javax.annotation.Nullable'
+  }
+}
+
 allprojects {
     pluginManager.withPlugin('java') {
         sourceSets.all {
