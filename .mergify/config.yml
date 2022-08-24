@@ -1,6 +1,6 @@
 # Configuration file for Mergify GitHub App: https://github.com/marketplace/mergify
 
-# All Status Checks should be listed explicitly (see https://doc.mergify.io/conditions.html#validating-all-status-check):
+# All Status Checks should be listed explicitly (see https://docs.mergify.io/conditions/#about-status-checks):
 #   `cross-versions-tests-success` - .github/workflows/build.yml
 #   `WIP` - https://github.com/marketplace/wip
 
@@ -14,10 +14,11 @@ pull_request_rules:
   - -draft
   - -locked
   - '#changes-requested-reviews-by=0'
-  - status-success=cross-versions-tests-success
-  - status-success=WIP
-  - '#status-neutral=0'
-  - '#status-failure=0'
+  - check-success=cross-versions-tests-success
+  - check-success=WIP
+  - '#check-pending=0'
+  - '#check-neutral=0'
+  - '#check-failure=0'
   actions:
     merge:
       method: squash
@@ -26,6 +27,7 @@ pull_request_rules:
   conditions:
   - '#approved-reviews-by=0'
   - author~=^(dependabot(-preview)?|renovate)\[bot\]$
+  - label!=sync-with-template
   - 'check-neutral!=renovate/stability-days'
   - 'check-pending!=renovate/stability-days'
   - 'check-failure!=renovate/stability-days'
@@ -37,16 +39,18 @@ pull_request_rules:
 - name: Merge by authors automatically
   conditions:
   - author=remal
+  - label!=sync-with-template
   - -conflict
   - -closed
   - -merged
   - -draft
   - -locked
   - '#changes-requested-reviews-by=0'
-  - status-success=cross-versions-tests-success
-  - status-success=WIP
-  - '#status-neutral=0'
-  - '#status-failure=0'
+  - check-success=cross-versions-tests-success
+  - check-success=WIP
+  - '#check-pending=0'
+  - '#check-neutral=0'
+  - '#check-failure=0'
   actions:
     review: { }
     merge:
