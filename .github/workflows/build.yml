@@ -29,6 +29,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency: populate-cache
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -37,31 +38,50 @@ jobs:
         fetch-depth: 1
     - name: Validate Gradle Wrapper
       uses: gradle/wrapper-validation-action@v1
-    - name: Cache
-      id: cache
+    - name: Cache Gradle wrapper
+      id: gradle-wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/wrapper/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      id: gradle-caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+      if: ${{steps.gradle-wrapper.outputs.cache-hit != 'true' || steps.gradle-caches.outputs.cache-hit != 'true'}}
       uses: actions/setup-java@v3
       with:
         java-version: 11
         distribution: zulu
-    - name: Create cache content
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+    - name: Create Gradle wrapper cache content
+      if: ${{steps.gradle-wrapper.outputs.cache-hit != 'true'}}
+      run: |
+        ./gradlew help
+        rm -f ~/.gradle/wrapper/dists/*/*/*.zip
+    - name: Create Gradle caches cache content
+      if: ${{steps.gradle-caches.outputs.cache-hit != 'true'}}
       run: |
         ./gradlew downloadDependencies
+
 
   build:
     needs:
     - populate-cache
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency:
+      group: build-${{github.ref}}
+      cancel-in-progress: true
     outputs:
       repository-isTemplate: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
+      publish-isGradlePlugin: ${{steps.publish-flags.outputs.isGradlePlugin}}
+      publish-isMavenCentral: ${{steps.publish-flags.outputs.isMavenCentral}}
       gradle-versions: ${{steps.gradle-versions.outputs.unstableMinors}}
     steps:
     - name: Checkout repository
@@ -69,12 +89,19 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache
+    - name: Cache Gradle wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -111,6 +138,23 @@ jobs:
     - name: Build
       run: |
         ./gradlew build publishToMavenLocal -Pdisable-tests=true
+    - name: Read publish flags
+      id: publish-flags
+      run: |
+        if [ -f "build/publish-gradle-plugin.flag" ]; then
+          echo "isGradlePlugin = true"
+          echo '::set-output name=isGradlePlugin::true'
+        else
+          echo "isGradlePlugin = false"
+          echo '::set-output name=isGradlePlugin::false'
+        fi
+        if [ -f "build/publish-maven-central.flag" ]; then
+          echo "isMavenCentral = true"
+          echo '::set-output name=isMavenCentral::true'
+        else
+          echo "isMavenCentral = false"
+          echo '::set-output name=isMavenCentral::false'
+        fi
     - name: Archive workspace
       run: |
         tar -cz -f "/tmp/workspace-${{github.run_id}}.tar.gz" `git ls-files -m -o`
@@ -120,6 +164,7 @@ jobs:
         name: workspace
         path: '/tmp/workspace-${{github.run_id}}.tar.gz'
         if-no-files-found: error
+        retention-days: 1
     - name: Read min supported Gradle version
       id: min-gradle-version
       uses: remal-github-actions/read-property@v1
@@ -137,30 +182,41 @@ jobs:
         password: ${{github.token}}
         min: ${{steps.min-gradle-version.outputs.value}}
 
+
   cross-versions-tests:
     needs:
     - build
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    env:
-      DISABLE_COMPILATION: 'true'
-      DISABLE_VERIFICATION_EXCEPT_TESTS: 'true'
     strategy:
       fail-fast: false
       matrix:
         gradle-version: ${{fromJSON(needs.build.outputs.gradle-versions)}}
+    concurrency:
+      group: cross-versions-tests-${{github.ref}}-${{toJSON(matrix)}}
+      cancel-in-progress: true
+    env:
+      DISABLE_COMPILATION: 'true'
+      DISABLE_VERIFICATION_EXCEPT_TESTS: 'true'
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache
+    - name: Cache Gradle wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -192,12 +248,15 @@ jobs:
       run: |
         echo "All cross versions tests executed successfully"
 
+
   push-back:
     if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}}
     needs:
+    - build
     - cross-versions-tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency: push-back
     env:
       DISABLE_COMPILATION: 'true'
       DISABLE_VERIFICATION: 'true'
@@ -207,12 +266,19 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache
+    - name: Cache Gradle wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -242,6 +308,7 @@ jobs:
         githubToken: ${{env.PUSH_BACK_TOKEN}}
         message: '[push-back] Push-back updated files during build'
 
+
   parse-git-tag:
     if: ${{github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')}}
     needs:
@@ -264,11 +331,13 @@ jobs:
           core.info(JSON.stringify(result, null, '  '))
           return result
 
-  evaluate-publish-conditions:
+
+  evaluate-gradle-plugin-publish-conditions:
     if: >-
       ${{
         github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         && fromJSON(needs.build.outputs.repository-isTemplate) != true
+        && fromJSON(needs.build.outputs.publish-isGradlePlugin) == true
         && fromJSON(needs.parse-git-tag.outputs.isVersion) == true
       }}
     needs:
@@ -280,13 +349,14 @@ jobs:
     steps:
     - name: Display success message
       run: |
-        echo "All publish conditions evaluated successfully"
+        echo "All Gradle Plugin publish conditions evaluated successfully"
 
   publish-to-gradle-plugins-portal:
     needs:
-    - evaluate-publish-conditions
+    - evaluate-gradle-plugin-publish-conditions
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency: publish-to-gradle-plugins-portal
     env:
       DISABLE_COMPILATION: 'true'
       DISABLE_VERIFICATION: 'true'
@@ -296,12 +366,19 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache
+    - name: Cache Gradle wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -320,11 +397,32 @@ jobs:
       run: |
         ./gradlew publishPlugins "-Pgradle.publish.key=${{secrets.GRADLE_PLUGINS_PORTAL_KEY}}" "-Pgradle.publish.secret=${{secrets.GRADLE_PLUGINS_PORTAL_SECRET}}"
 
+
+  evaluate-maven-central-publish-conditions:
+    if: >-
+      ${{
+        github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        && fromJSON(needs.build.outputs.repository-isTemplate) != true
+        && fromJSON(needs.build.outputs.publish-isMavenCentral) == true
+        && fromJSON(needs.parse-git-tag.outputs.isVersion) == true
+      }}
+    needs:
+    - build
+    - cross-versions-tests
+    - parse-git-tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Display success message
+      run: |
+        echo "All Maven Central publish conditions evaluated successfully"
+
   publish-to-maven-central:
     needs:
-    - evaluate-publish-conditions
+    - evaluate-maven-central-publish-conditions
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency: publish-to-maven-central
     env:
       DISABLE_COMPILATION: 'true'
       DISABLE_VERIFICATION: 'true'
@@ -334,12 +432,19 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache
+    - name: Cache Gradle wrapper
       uses: actions/cache@v3
       with:
-        key: ${{runner.os}}-gradle-${{hashFiles('gradle/**', '**/*.gradle')}}
+        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle-wrapper.properties')}}
         path: |
-          ~/.gradle
+          ~/.gradle/wrapper/dists
+    - name: Cache Gradle caches
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle-wrapper.properties', '**/*.gradle', '**/gradle.properties')}}
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/notifications
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:

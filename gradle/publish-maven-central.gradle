@@ -1,7 +1,12 @@
 allprojects {
     rootProject.evaluationDependsOnChildren()
+
     pluginManager.withPlugin('maven-publish') {
         rootProject.apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
+        File flagFile = project.file("${rootProject.buildDir}/publish-maven-central.flag")
+        flagFile.parentFile.mkdirs()
+        flagFile.text = ''
     }
 
     pluginManager.withPlugin('io.github.gradle-nexus.publish-plugin') {
