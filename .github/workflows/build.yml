@@ -230,9 +230,6 @@ jobs:
     - name: Update README
       run: |
         ./gradlew processReadme
-    - name: Update Renovate config
-      run: |
-        ./gradlew configureRenovate
     - name: Update IDEA settings
       run: |
         ./gradlew processIdeaSettings
