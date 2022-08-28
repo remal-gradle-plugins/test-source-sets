@@ -1,23 +1,37 @@
+# Remal Gradle plugins:
 /gradle-ci.properties
 
+
+# Logs:
 log/
+!**/src/**/log/
 *.log
+
+
+# Java:
 hs_err_pid*
 java_pid*.hprof
 
+
 # Maven:
 target/
+!**/src/**/target/
+
 
 # Gradle:
 build/
 !**/src/**/build/
 build-cache/
+!**/src/**/build-cache/
 .gradle/
 
-# NodeJS
-/node_modules
 
-# Intellij
+# NodeJS:
+node_modules/
+
+
+# IntelliJ:
+/layout.json
 /.idea/*
 !/.idea/.editorconfig
 !/.idea/groovyc.xml
@@ -39,10 +53,12 @@ build-cache/
 *.iws
 *.*___jb_tmp___
 
-# Eclipse
+
+# Eclipse:
 .classpath
 .project
 .settings/
 
-# Mac
+
+# Mac:
 .DS_Store
