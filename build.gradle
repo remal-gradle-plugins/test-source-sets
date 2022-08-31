@@ -2,13 +2,10 @@
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2.2.3'
-        classpath 'com.gradle.publish:plugin-publish-plugin:1.0.0'
-        classpath 'name.remal.gradle-plugins.idea-settings:idea-settings:2.0.0-rc-9'
-        classpath 'gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6'
-        classpath 'name.remal:gradle-plugins:1.7.0'
-        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
-        classpath 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2'
+        //classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2-SNAPSHOT'
+        classpath('name.remal.gradle-plugins.toolkit:build-logic:0.27.0') {
+            //exclude group: 'name.remal.gradle-plugins.test-source-sets'
+        }
     }
     repositories {
         gradlePluginPortal()
@@ -21,30 +18,13 @@ buildscript {
 allprojects {
     group = "name.remal.gradle-plugins.${rootProject.name}"
     version = '2-SNAPSHOT'
-}
 
-apply from: 'gradle/properties.gradle'
-apply from: 'gradle/ci.gradle'
-apply from: 'gradle/dependencies.gradle'
-apply from: 'gradle/java.gradle'
-apply from: 'gradle/classes-relocation.gradle'
-apply from: 'gradle/groovy.gradle'
-apply from: 'gradle/checkstyle.gradle'
-apply from: 'gradle/errorprone.gradle'
-apply from: 'gradle/gradle-plugin.gradle'
-apply from: 'gradle/base-package.gradle'
-apply from: 'gradle/publish-gradle-plugin.gradle'
-apply from: 'gradle/publish-maven.gradle'
-apply from: 'gradle/publish-maven-bom.gradle'
-apply from: 'gradle/publish-maven-central.gradle'
-apply from: 'gradle/signing.gradle'
-apply from: 'gradle/process-readme.gradle'
-apply from: 'gradle/ide.gradle'
+    apply plugin: 'name.remal.toolkit.build-logic'
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 apply plugin: 'java-gradle-plugin'
-apply plugin: 'groovy'
 
 configurations.optional.extendsFrom(configurations.correspondingKotlinPlugin)
 
