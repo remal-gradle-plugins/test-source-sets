@@ -38,34 +38,22 @@ jobs:
         fetch-depth: 1
     - name: Validate Gradle Wrapper
       uses: gradle/wrapper-validation-action@v1
-    - name: Cache Gradle wrapper
-      id: gradle-wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      id: gradle-caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      id: cache-gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
-      if: ${{steps.gradle-wrapper.outputs.cache-hit != 'true' || steps.gradle-caches.outputs.cache-hit != 'true'}}
+      if: ${{steps.cache-gradle.outputs.gradle-wrapper-cache-hit != 'true' || steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
       uses: actions/setup-java@v3
       with:
         java-version: 11
         distribution: zulu
     - name: Create Gradle wrapper cache content
-      if: ${{steps.gradle-wrapper.outputs.cache-hit != 'true'}}
+      if: ${{steps.cache-gradle.outputs.gradle-wrapper-cache-hit != 'true'}}
       run: |
         ./gradlew help
         rm -f ~/.gradle/wrapper/dists/*/*/*.zip
     - name: Create Gradle caches cache content
-      if: ${{steps.gradle-caches.outputs.cache-hit != 'true'}}
+      if: ${{steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
       run: |
         ./gradlew downloadDependencies
 
@@ -89,19 +77,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache Gradle wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -204,19 +181,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache Gradle wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -266,19 +232,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache Gradle wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -366,19 +321,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache Gradle wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
@@ -432,19 +376,8 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 1
-    - name: Cache Gradle wrapper
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-wrapper-${{hashFiles('gradle/wrapper/gradle-wrapper.properties')}}
-        path: |
-          ~/.gradle/wrapper/dists
-    - name: Cache Gradle caches
-      uses: actions/cache@v3
-      with:
-        key: ${{runner.os}}-gradle-caches-${{hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/*.gradle', '**/*.gradle.kts', '**/gradle.properties')}}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/notifications
+    - name: Cache Gradle
+      uses: remal-github-actions/cache-gradle@main
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
