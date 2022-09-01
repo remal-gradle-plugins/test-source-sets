@@ -51,11 +51,14 @@ jobs:
       if: ${{steps.cache-gradle.outputs.gradle-wrapper-cache-hit != 'true'}}
       run: |
         ./gradlew help
-        rm -f ~/.gradle/wrapper/dists/*/*/*.zip
     - name: Create Gradle caches cache content
       if: ${{steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
       run: |
         ./gradlew downloadDependencies
+    - name: Cleanup Gradle wrapper cache
+      if: ${{steps.cache-gradle.outputs.gradle-wrapper-cache-hit != 'true' || steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
+      run: |
+        rm -f ${{env.GRADLE_USER_HOME || '~/.gradle'}}/wrapper/dists/*/*/*.zip
 
 
   build:
@@ -63,9 +66,6 @@ jobs:
     - populate-cache
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    concurrency:
-      group: build-${{github.ref}}
-      cancel-in-progress: true
     outputs:
       repository-isTemplate: ${{fromJSON(steps.repository-info.outputs.result).isTemplate}}
       publish-isGradlePlugin: ${{steps.publish-flags.outputs.isGradlePlugin}}
@@ -169,9 +169,6 @@ jobs:
       fail-fast: false
       matrix:
         gradle-version: ${{fromJSON(needs.build.outputs.gradle-versions)}}
-    concurrency:
-      group: cross-versions-tests-${{github.ref}}-${{toJSON(matrix)}}
-      cancel-in-progress: true
     env:
       DISABLE_COMPILATION: 'true'
       DISABLE_VERIFICATION_EXCEPT_TESTS: 'true'
@@ -251,6 +248,9 @@ jobs:
     - name: Update README
       run: |
         ./gradlew processReadme
+    - name: Collect all Gradle plugin API dependencies
+      run: |
+        ./gradlew collectAllGradlePluginApiDependencies
     - name: Update IDEA settings
       run: |
         ./gradlew processIdeaSettings
@@ -267,6 +267,7 @@ jobs:
   parse-git-tag:
     if: ${{github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')}}
     needs:
+    - build
     - cross-versions-tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
