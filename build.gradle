@@ -3,7 +3,7 @@
 buildscript {
     dependencies {
         //classpath 'name.remal.gradle-plugins.test-source-sets:test-source-sets:2-SNAPSHOT'
-        classpath('name.remal.gradle-plugins.toolkit:build-logic:0.27.0') {
+        classpath('name.remal.gradle-plugins.toolkit:build-logic:0.27.1') {
             //exclude group: 'name.remal.gradle-plugins.test-source-sets'
         }
     }
