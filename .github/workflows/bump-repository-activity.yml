@@ -2,7 +2,7 @@ name: Bump repository activity
 
 on:
   schedule:
-  - cron: '0 2 * * 1'
+  - cron: '0 2 * * 0'
   push:
     branches:
     - main

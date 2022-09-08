@@ -48,7 +48,7 @@ node_modules/
 !/.idea/copyright/*
 !/.idea/dictionaries/
 /.idea/dictionaries/*
-!/.idea/dictionaries/.placeholder
+!/.idea/dictionaries/.gitkeep
 *.iml
 *.iws
 *.*___jb_tmp___

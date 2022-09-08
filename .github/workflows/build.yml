@@ -8,7 +8,7 @@ on:
     - '*'
   pull_request: { }
   schedule:
-  - cron: '43 6 * * *'
+  - cron: '37 6 * * *'
   workflow_dispatch: { }
 
 defaults:
@@ -55,10 +55,6 @@ jobs:
       if: ${{steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
       run: |
         ./gradlew downloadDependencies
-    - name: Cleanup Gradle wrapper cache
-      if: ${{steps.cache-gradle.outputs.gradle-wrapper-cache-hit != 'true' || steps.cache-gradle.outputs.gradle-caches-cache-hit != 'true'}}
-      run: |
-        rm -f ${{env.GRADLE_USER_HOME || '~/.gradle'}}/wrapper/dists/*/*/*.zip
 
 
   build:
