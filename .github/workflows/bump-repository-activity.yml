@@ -28,5 +28,5 @@ jobs:
     - name: Push back
       uses: remal-github-actions/push-back@v1
       with:
-        githubToken: ${{ secrets.PUSH_BACK_TOKEN }}
+        githubToken: ${{secrets.PUSH_BACK_TOKEN}}
         message: '[push-back] Bump repository activity'

@@ -19,13 +19,14 @@ jobs:
     - name: Automatic release
       uses: remal-github-actions/automatic-release@v1
       with:
-        dryRun: 'true'
+        githubToken: ${{secrets.PUSH_BACK_TOKEN}}
         versionIncrementMode: 'patch'
         versionTagPrefix: 'v'
         expectedFilesToChange: |
           gradle-plugin-api-dependencies.txt
         allowedCommitPrefixes: |
           [push-back]
+          [ci]
         allowedPullRequestLabels: |
           dependencies
           sync-with-template
