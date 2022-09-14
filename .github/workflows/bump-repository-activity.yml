@@ -2,7 +2,7 @@ name: Bump repository activity
 
 on:
   schedule:
-  - cron: '0 2 * * 0'
+  - cron: '0 2 * * *'
   push:
     branches:
     - main
@@ -12,21 +12,17 @@ on:
 
 jobs:
   bump-repository-activity:
+    name: Bump repository activity
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency: bump-repository-activity
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Bump repository activity
+      uses: remal-github-actions/bump-repository-activity@v1
+      env:
+        PUSH_BACK_TOKEN: ${{secrets.PUSH_BACK_TOKEN}}
+      if: ${{env.PUSH_BACK_TOKEN}}
       with:
-        submodules: 'false'
-        lfs: 'false'
-        fetch-depth: 1
-    - name: Update repository-activity.bumper
-      run: |
-        date > "repository-activity.bumper"
-    - name: Push back
-      uses: remal-github-actions/push-back@v1
-      with:
-        githubToken: ${{secrets.PUSH_BACK_TOKEN}}
-        message: '[push-back] Bump repository activity'
+        githubToken: ${{env.PUSH_BACK_TOKEN}}
+        bumperFile: 'repository-activity.bumper'
+        commitMessage: '[push-back] Bump repository activity'
