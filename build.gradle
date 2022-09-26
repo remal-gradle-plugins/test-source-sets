@@ -18,9 +18,9 @@ buildscript {
 allprojects {
     group = "name.remal.gradle-plugins.${rootProject.name}"
     version = '2-SNAPSHOT'
-
-    apply plugin: 'name.remal.toolkit.build-logic'
 }
+
+apply plugin: 'name.remal.toolkit.build-logic'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
