@@ -1,22 +1,24 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 buildscript {
+    String pluginGroupId = "name.remal.gradle-plugins.${rootProject.name}"
+    String pluginArtifactId = rootProject.name
+    String pluginSnapshotVersion = '2-SNAPSHOT'
+    allprojects {
+        group = pluginGroupId
+        version = pluginSnapshotVersion
+    }
     dependencies {
-        //classpath('name.remal.gradle-plugins.test-source-sets:test-source-sets') { version { strictly('2-SNAPSHOT') } }
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.35.0'
+        //classpath("$pluginGroupId:$pluginArtifactId") { version { strictly(pluginSnapshotVersion) } }
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.35.1'
     }
     repositories {
-        gradlePluginPortal()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-allprojects {
-    group = "name.remal.gradle-plugins.${rootProject.name}"
-    version = '2-SNAPSHOT'
-}
 
 apply plugin: 'name.remal.toolkit.build-logic'
 
