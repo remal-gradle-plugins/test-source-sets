@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import name.remal.gradleplugins.toolkit.IdeaModuleUtils;
 import org.gradle.api.Project;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
@@ -67,15 +68,15 @@ abstract class TestSourceSetsConfigurerIdea {
 
             adjustSetProperty(
                 module,
-                IdeaModule::getTestSourceDirs,
-                IdeaModule::setTestSourceDirs,
+                IdeaModuleUtils::getTestSourceDirs,
+                IdeaModuleUtils::setTestSourceDirs,
                 set -> set.addAll(testSourceSet.getAllJava().getSrcDirs())
             );
 
             adjustSetProperty(
                 module,
-                IdeaModule::getTestResourceDirs,
-                IdeaModule::setTestResourceDirs,
+                IdeaModuleUtils::getTestResourceDirs,
+                IdeaModuleUtils::setTestResourceDirs,
                 set -> set.addAll(testSourceSet.getResources().getSrcDirs())
             );
 
