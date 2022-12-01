@@ -1,14 +1,9 @@
 package name.remal.gradleplugins.testsourcesets;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
-import static name.remal.gradleplugins.toolkit.ReportUtils.setReportDestination;
-import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
 import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
-import static org.gradle.api.reporting.Report.OutputType.DIRECTORY;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP;
@@ -17,10 +12,8 @@ import java.io.File;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.gradle.api.Project;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
 import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
@@ -57,20 +50,6 @@ abstract class TestSourceSetsConfigurerJacoco {
                 task.sourceSets(getExtension(project, SourceSetContainer.class)
                     .getByName(MAIN_SOURCE_SET_NAME)
                 );
-
-                val reportsDirProvider = createBaseJacocoReportsDirProvider(project);
-                task.getReports().all(report -> {
-                    setReportDestination(report, project.provider(() -> {
-                        val reportsDir = reportsDirProvider.get();
-                        val taskReportsDir = new File(reportsDir, testTaskName);
-                        return new File(
-                            taskReportsDir,
-                            report.getOutputType().equals(DIRECTORY)
-                                ? report.getName()
-                                : task.getName() + "." + report.getName()
-                        );
-                    }));
-                });
             }
         );
     }
@@ -99,31 +78,6 @@ abstract class TestSourceSetsConfigurerJacoco {
             val testTask = project.getTasks().getByName(testTaskName);
             val testTaskJacoco = getExtension(testTask, JacocoTaskExtension.class);
             return testTaskJacoco.getDestinationFile();
-        });
-    }
-
-    private static Provider<File> createBaseJacocoReportsDirProvider(Project project) {
-        return project.provider(() -> {
-            val jacoco = getExtension(project, JacocoPluginExtension.class);
-            val getReportsDirectory = findMethod(
-                classOf(jacoco),
-                DirectoryProperty.class,
-                "getReportsDirectory"
-            );
-            if (getReportsDirectory != null) {
-                return requireNonNull(getReportsDirectory.invoke(jacoco)).getAsFile().get();
-            }
-
-            val getReportsDir = findMethod(
-                classOf(jacoco),
-                File.class,
-                "getReportsDir"
-            );
-            if (getReportsDir != null) {
-                return getReportsDir.invoke(jacoco);
-            }
-
-            throw new UnsupportedOperationException("Can't get Jacoco reports dir");
         });
     }
 

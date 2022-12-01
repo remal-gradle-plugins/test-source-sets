@@ -21,6 +21,7 @@ class TestSourceSetsPluginFunctionalTest {
     void beforeEach() {
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.test-source-sets");
+            build.append("repositories { mavenCentral() }");
             build.registerDefaultTask(ALL_TESTS_TASK_NAME);
             build.append(
                 "testSourceSets { additional }"
@@ -35,7 +36,7 @@ class TestSourceSetsPluginFunctionalTest {
     }
 
     @Test
-    @DisplayName("empty build performs successfully")
+    @DisplayName("empty build with Jacoco performs successfully")
     void buildWithJacocoPerformsSuccessfully() {
         project.forBuildFile(build -> {
             build.applyPlugin("jacoco");
