@@ -67,6 +67,8 @@ class TestSourceSetsPluginFunctionalTest {
             );
         });
 
+        project.withoutConfigurationCache();
+
         project.assertBuildSuccessfully();
     }
 
