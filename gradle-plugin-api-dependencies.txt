@@ -1,5 +1,5 @@
 # This file is generated automatically by `collectAllGradlePluginApiDependencies` Gradle task.
 # Do not modify it yourself unless you know what you are doing.
 
+classes-that-rely-on-gradle-internal-api:f96e85a2dff3051625aefe4d2164079f0761e1eebf6c45f942f9915431c425f8
 org.ow2.asm:asm-bom:9.4:@pom
-toolkit-classes-that-rely-on-internal-api:6aac701d7414b0526095248eec8ff496133af9550680bd58f6a17ae25b03f5cb
