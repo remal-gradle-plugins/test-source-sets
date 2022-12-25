@@ -1,13 +1,13 @@
-package name.remal.gradleplugins.testsourcesets.internal;
+package name.remal.gradle_plugins.test_source_sets.internal;
 
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static org.gradle.api.reflect.TypeOf.typeOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.testsourcesets.TestTaskNameExtension;
-import name.remal.gradleplugins.toolkit.testkit.ApplyPlugin;
+import name.remal.gradle_plugins.test_source_sets.TestTaskNameExtension;
+import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.tasks.SourceSetContainer;

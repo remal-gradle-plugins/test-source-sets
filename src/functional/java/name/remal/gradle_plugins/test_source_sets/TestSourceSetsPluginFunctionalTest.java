@@ -1,13 +1,13 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
-import static name.remal.gradleplugins.testsourcesets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
-import static name.remal.gradleplugins.toolkit.StringUtils.escapeGroovy;
+import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
+import static name.remal.gradle_plugins.toolkit.StringUtils.escapeGroovy;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.toolkit.testkit.MinSupportedGradleVersion;
-import name.remal.gradleplugins.toolkit.testkit.functional.GradleProject;
+import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
+import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

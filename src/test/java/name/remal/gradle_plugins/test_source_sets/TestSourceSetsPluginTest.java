@@ -1,12 +1,12 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.findExtension;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
-import static name.remal.gradleplugins.toolkit.IdeaModuleUtils.getTestResourceDirs;
-import static name.remal.gradleplugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
-import static name.remal.gradleplugins.toolkit.testkit.ProjectAfterEvaluateActionsExecutor.executeAfterEvaluateActions;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.findExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestResourceDirs;
+import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
+import static name.remal.gradle_plugins.toolkit.testkit.ProjectAfterEvaluateActionsExecutor.executeAfterEvaluateActions;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.toolkit.testkit.ApplyPlugin;
-import name.remal.gradleplugins.toolkit.testkit.MinSupportedGradleVersion;
+import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
+import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPluginExtension;

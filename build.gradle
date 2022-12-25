@@ -1,11 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 buildscript {
-    String pluginRootGroupId = project.ext.pluginRootGroupId = "name.remal.gradle-plugins.${rootProject.name}"
-    String pluginRootArtifactId = project.ext.pluginRootArtifactId = rootProject.name
-    String pluginRootSnapshotVersion = project.ext.pluginRootSnapshotVersion = '2-SNAPSHOT'
+    String rootGroupId = project.ext.rootGroupId = "name.remal.gradle-plugins.${rootProject.name}"
+    String rootArtifactId = project.ext.rootArtifactId = rootProject.name
+    String rootSnapshotVersion = project.ext.rootSnapshotVersion = '2-SNAPSHOT'
     dependencies {
-        //classpath("$pluginRootGroupId:$pluginRootArtifactId:$pluginRootSnapshotVersion") { version { strictly(pluginRootSnapshotVersion) } }
+        //classpath("$rootGroupId:$rootArtifactId:$rootSnapshotVersion") { version { strictly(rootSnapshotVersion) } }
         classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.52.0'
     }
     repositories {
@@ -17,8 +17,8 @@ buildscript {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 allprojects {
-    group = project.pluginRootGroupId
-    version = project.pluginRootSnapshotVersion
+    group = project.rootGroupId
+    version = project.rootSnapshotVersion
 }
 
 apply plugin: 'name.remal.toolkit.build-logic'
@@ -36,13 +36,13 @@ gradlePlugin {
     plugins {
         'name.remal.test-source-sets' {
             id = 'name.remal.test-source-sets'
-            implementationClass = 'name.remal.gradleplugins.testsourcesets.TestSourceSetsPlugin'
+            implementationClass = 'name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin'
             displayName = 'A plugin that creates `testSourceSets` extension'
             description = property('repository-description')
         }
         'name.remal.integration-tests' {
             id = 'name.remal.integration-tests'
-            implementationClass = 'name.remal.gradleplugins.testsourcesets.IntegrationTestsPlugin'
+            implementationClass = 'name.remal.gradle_plugins.test_source_sets.IntegrationTestsPlugin'
             displayName = 'A plugin that creates `integration` source set for integration tests'
             description = displayName
         }

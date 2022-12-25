@@ -1,10 +1,10 @@
-package name.remal.gradleplugins.testsourcesets.internal;
+package name.remal.gradle_plugins.test_source_sets.internal;
 
 import static org.gradle.api.reflect.TypeOf.typeOf;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.testsourcesets.TestTaskNameExtension;
+import name.remal.gradle_plugins.test_source_sets.TestTaskNameExtension;
 import org.gradle.api.reflect.HasPublicType;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;

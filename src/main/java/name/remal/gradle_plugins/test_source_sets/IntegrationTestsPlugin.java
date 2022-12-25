@@ -1,4 +1,4 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import lombok.val;
 import org.gradle.api.Plugin;
