@@ -1,8 +1,8 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
-import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

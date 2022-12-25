@@ -1,14 +1,14 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.addExtension;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.testsourcesets.internal.DefaultTestTaskNameExtension;
-import name.remal.gradleplugins.toolkit.testkit.ApplyPlugin;
+import name.remal.gradle_plugins.test_source_sets.internal.DefaultTestTaskNameExtension;
+import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownDomainObjectException;
 import org.gradle.api.plugins.JavaBasePlugin;

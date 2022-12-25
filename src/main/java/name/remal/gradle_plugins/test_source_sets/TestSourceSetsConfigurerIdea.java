@@ -1,17 +1,17 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.testsourcesets.Utils.adjustMapProperty;
-import static name.remal.gradleplugins.testsourcesets.Utils.adjustMapSetValue;
-import static name.remal.gradleplugins.testsourcesets.Utils.adjustSetProperty;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
-import static name.remal.gradleplugins.toolkit.ProjectUtils.afterEvaluateOrNow;
+import static name.remal.gradle_plugins.test_source_sets.Utils.adjustMapProperty;
+import static name.remal.gradle_plugins.test_source_sets.Utils.adjustMapSetValue;
+import static name.remal.gradle_plugins.test_source_sets.Utils.adjustSetProperty;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.toolkit.IdeaModuleUtils;
+import name.remal.gradle_plugins.toolkit.IdeaModuleUtils;
 import org.gradle.api.Project;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;

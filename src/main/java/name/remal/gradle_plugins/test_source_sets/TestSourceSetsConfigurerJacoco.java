@@ -1,8 +1,8 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;

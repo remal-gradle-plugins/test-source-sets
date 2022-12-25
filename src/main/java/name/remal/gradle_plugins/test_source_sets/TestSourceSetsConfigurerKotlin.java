@@ -1,11 +1,11 @@
-package name.remal.gradleplugins.testsourcesets;
+package name.remal.gradle_plugins.test_source_sets;
 
 import static java.util.Arrays.asList;
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.testsourcesets.Utils.classOf;
-import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
-import static name.remal.gradleplugins.toolkit.PluginManagerUtils.withAnyOfPlugins;
-import static name.remal.gradleplugins.toolkit.reflection.MembersFinder.findMethod;
+import static name.remal.gradle_plugins.test_source_sets.Utils.classOf;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.PluginManagerUtils.withAnyOfPlugins;
+import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.findMethod;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 
 import lombok.CustomLog;
