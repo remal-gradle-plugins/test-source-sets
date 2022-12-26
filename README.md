@@ -82,3 +82,9 @@ Internal members of `main` source set **are** accessible in all test source sets
 [![configuration cache: supported](https://img.shields.io/static/v1?label=configuration%20cache&message=supported&color=success)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
 A Gradle plugin that applies `name.remal.test-source-sets` plugin and creates `integration` test source set.
+
+# Migration guide
+
+## Version 2.* to 3.*
+
+Package name was changed from `name.remal.gradleplugins.testsourcesets` to `name.remal.gradle_plugins.test_source_sets`.
