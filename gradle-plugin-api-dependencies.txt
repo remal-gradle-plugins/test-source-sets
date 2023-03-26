@@ -2,4 +2,4 @@
 # Do not modify it yourself unless you know what you are doing.
 
 classes-that-rely-on-gradle-internal-api:c52b2c831fc97fe46bd0c7dbe2eb49c5e1371c60e480dc2ed57130e6a35847f1
-org.ow2.asm:asm-bom:9.4:@pom
+org.ow2.asm:asm-bom:9.5:@pom
