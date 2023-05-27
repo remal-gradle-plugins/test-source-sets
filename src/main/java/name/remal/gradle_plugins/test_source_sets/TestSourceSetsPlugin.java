@@ -1,6 +1,7 @@
 package name.remal.gradle_plugins.test_source_sets;
 
 import static java.util.stream.Collectors.toList;
+import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerEclipse.configureEclipse;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerKotlin.configureKotlinTestSourceSets;
@@ -8,6 +9,7 @@ import static name.remal.gradle_plugins.test_source_sets.TestTaskNameExtension.g
 import static name.remal.gradle_plugins.toolkit.ConventionUtils.addConventionPlugin;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.createExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
@@ -37,9 +39,9 @@ import org.gradle.util.GradleVersion;
 
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
-    public static final String TEST_SOURCE_SETS_EXTENSION_NAME = "testSourceSets";
+    public static final String TEST_SOURCE_SETS_EXTENSION_NAME = doNotInline("testSourceSets");
 
-    public static final String ALL_TESTS_TASK_NAME = "allTests";
+    public static final String ALL_TESTS_TASK_NAME = doNotInline("allTests");
 
 
     private static final boolean IS_MODULARITY_SUPPORTED =
@@ -63,6 +65,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         configureTestTasks(project);
         configureJacoco(project);
         configureIdea(project);
+        configureEclipse(project);
 
         configureKotlinTestSourceSets(project);
     }
