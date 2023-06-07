@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.gradle.api.Project;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @RequiredArgsConstructor
@@ -21,10 +20,9 @@ class IntegrationTestsPluginTest {
 
 
     @Test
-    @DisplayName("'integration' test-source-set is created")
     void integrationTestSourceSetIsCreated() {
         val testSourceSets = project.getExtensions().getByType(TestSourceSetContainer.class);
-        assertNotNull(testSourceSets.getByName("integration"));
+        assertNotNull(testSourceSets.getByName("integrationTest"));
     }
 
 }

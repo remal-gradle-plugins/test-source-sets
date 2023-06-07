@@ -2,6 +2,7 @@ package name.remal.gradle_plugins.test_source_sets;
 
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
+import static name.remal.gradle_plugins.test_source_sets.TestTaskNameGetter.getTestTaskName;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static org.codehaus.groovy.runtime.StringGroovyMethods.capitalize;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
@@ -28,7 +29,7 @@ abstract class TestSourceSetsConfigurerJacoco {
 
             val testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> {
-                val testTaskName = getExtension(sourceSet, TestTaskNameExtension.class).getTestTaskName();
+                val testTaskName = getTestTaskName(sourceSet);
                 createJacocoReportTask(project, testTaskName);
                 createJacocoCoverageVerificationTask(project, testTaskName);
             });

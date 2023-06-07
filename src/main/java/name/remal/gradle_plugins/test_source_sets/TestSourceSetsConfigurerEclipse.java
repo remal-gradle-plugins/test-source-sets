@@ -28,6 +28,7 @@ abstract class TestSourceSetsConfigurerEclipse {
         });
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static void configureEclipseImpl(Project project) {
         val eclipseModel = getExtension(project, EclipseModel.class);
         val eclipseClasspath = eclipseModel.getClasspath();

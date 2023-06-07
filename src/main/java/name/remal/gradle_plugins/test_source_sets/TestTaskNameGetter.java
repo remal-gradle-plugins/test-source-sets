@@ -4,20 +4,24 @@ import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExten
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
 
+import java.util.concurrent.Callable;
 import lombok.val;
 import org.gradle.api.tasks.SourceSet;
 
-public interface TestTaskNameExtension {
+@FunctionalInterface
+public interface TestTaskNameGetter extends Callable<String> {
 
-    String getTestTaskName();
+    @Override
+    String call();
 
 
     static String getTestTaskName(SourceSet sourceSet) {
         if (sourceSet.getName().equals(TEST_SOURCE_SET_NAME)) {
             return TEST_TASK_NAME;
         }
-        val extension = getExtension(sourceSet, TestTaskNameExtension.class);
-        return extension.getTestTaskName();
+
+        val extension = getExtension(sourceSet, TestTaskNameGetter.class);
+        return extension.call();
     }
 
 }

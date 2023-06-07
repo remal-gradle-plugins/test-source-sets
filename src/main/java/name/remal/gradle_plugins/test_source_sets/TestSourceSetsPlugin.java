@@ -1,13 +1,14 @@
 package name.remal.gradle_plugins.test_source_sets;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static name.remal.gradle_plugins.test_source_sets.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerEclipse.configureEclipse;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerKotlin.configureKotlinTestSourceSets;
-import static name.remal.gradle_plugins.test_source_sets.TestTaskNameExtension.getTestTaskName;
-import static name.remal.gradle_plugins.toolkit.ConventionUtils.addConventionPlugin;
-import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.createExtension;
+import static name.remal.gradle_plugins.test_source_sets.TestTaskNameGetter.getTestTaskName;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
@@ -21,25 +22,31 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import lombok.CustomLog;
 import lombok.SneakyThrows;
 import lombok.val;
-import name.remal.gradle_plugins.test_source_sets.internal.DefaultTestTaskNameExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.plugins.UnknownPluginException;
+import org.gradle.api.plugins.jvm.JvmTestSuite;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.testing.base.TestingExtension;
 import org.gradle.util.GradleVersion;
 
+@CustomLog
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = doNotInline("testSourceSets");
+    public static final String TEST_TASK_NAME_GETTER_EXTENSION_NAME = doNotInline("getTestTaskName");
 
     public static final String ALL_TESTS_TASK_NAME = doNotInline("allTests");
 
@@ -51,9 +58,15 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(JavaPlugin.class);
-        val sourceSets = getExtension(project, SourceSetContainer.class);
 
-        val testSourceSets = createTestSourceSetContainer(project, sourceSets);
+        try {
+            project.getPluginManager().apply("jvm-test-suite");
+        } catch (UnknownPluginException ignored) {
+            return;
+        }
+
+        val sourceSets = getExtension(project, SourceSetContainer.class);
+        val testSourceSets = createTestSourceSetContainer(project);
         project.getExtensions().add(TestSourceSetContainer.class, TEST_SOURCE_SETS_EXTENSION_NAME, testSourceSets);
 
         val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
@@ -61,7 +74,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
         configureConfigurations(project);
         configureClasspaths(project);
-        configureTestTaskNameExtension(project);
+        configureTestTaskNameGetterExtension(project);
         configureTestTasks(project);
         configureJacoco(project);
         configureIdea(project);
@@ -70,12 +83,63 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         configureKotlinTestSourceSets(project);
     }
 
-    private static TestSourceSetContainer createTestSourceSetContainer(Project project, SourceSetContainer sourceSets) {
-        val container = project.container(SourceSet.class, sourceSets::create);
-        sourceSets.whenObjectRemoved(container::remove);
-        container.whenObjectRemoved(sourceSets::remove);
+    @SneakyThrows
+    private static TestSourceSetContainer createTestSourceSetContainer(Project project) {
+        val testSuffixCheck = project.getObjects().property(TestSuffixCheckMode.class);
+        testSuffixCheck.convention(TestSuffixCheckMode.FAIL);
 
-        return toDynamicInterface(container, TestSourceSetContainer.class);
+        Consumer<String> checkTestSourceSetName = name -> {
+            if (!name.endsWith("Test")) {
+                val message = format(
+                    "Test source set name does NOT end with \"Test\": \"%s\". It violates principles of"
+                        + " `jvm-test-suite` Gradle plugin. Please add \"Test\" suffix to the test source set name."
+                        + " If you want to configure or completely disable this check, see the plugin's"
+                        + " documentation: %s#test-source-set-name-suffix-check",
+                    name,
+                    PLUGIN_REPOSITORY_HTML_URL
+                );
+                val testSuffixCheckMode = testSuffixCheck.getOrNull();
+                if (testSuffixCheckMode == TestSuffixCheckMode.FAIL) {
+                    throw new InvalidTestSourceSetNameSuffix(message);
+                } else if (testSuffixCheckMode == TestSuffixCheckMode.WARN) {
+                    logger.warn(message);
+                }
+            }
+        };
+
+        val testSourceSets = project.container(SourceSet.class, name -> {
+            checkTestSourceSetName.accept(name);
+            return createSourceSet(project, name);
+        });
+
+        val sourceSets = getExtension(project, SourceSetContainer.class);
+        sourceSets.whenObjectRemoved(testSourceSets::remove);
+        testSourceSets.whenObjectRemoved(sourceSets::remove);
+
+        val getTestSuffixCheckMethod = TestSourceSetContainer.class.getMethod("getTestSuffixCheck");
+        return toDynamicInterface(testSourceSets, TestSourceSetContainer.class, invocationHandler -> {
+            invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
+        });
+    }
+
+    private static SourceSet createSourceSet(Project project, String name) {
+        if (project.getPluginManager().hasPlugin("jvm-test-suite")) {
+            return createTestSuiteSourceSet(project, name);
+
+        } else {
+            return createSourceSetDefault(project, name);
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static SourceSet createTestSuiteSourceSet(Project project, String name) {
+        val testing = getExtension(project, TestingExtension.class);
+        val testSuite = testing.getSuites().create(name, JvmTestSuite.class);
+        return testSuite.getSources();
+    }
+
+    private static SourceSet createSourceSetDefault(Project project, String name) {
+        return getExtension(project, SourceSetContainer.class).create(name);
     }
 
 
@@ -144,16 +208,15 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 
-    private static void configureTestTaskNameExtension(Project project) {
+    private static void configureTestTaskNameGetterExtension(Project project) {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.all(testSourceSet -> {
-            val extension = createExtension(
+            addExtension(
                 testSourceSet,
-                TestTaskNameExtension.class,
-                DefaultTestTaskNameExtension.class,
-                testSourceSet
+                TestTaskNameGetter.class,
+                TEST_TASK_NAME_GETTER_EXTENSION_NAME,
+                testSourceSet::getName
             );
-            addConventionPlugin(testSourceSet, extension);
         });
     }
 
@@ -168,6 +231,12 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.whenObjectAdded(testSourceSet -> {
             val testTaskName = getTestTaskName(testSourceSet);
+            allTestsTask.configure(it -> it.dependsOn(testTaskName));
+
+            if (project.getTasks().getNames().contains(testTaskName)) {
+                return;
+            }
+
             project.getTasks().register(testTaskName, Test.class, task -> {
                 task.setGroup(VERIFICATION_GROUP);
                 task.setDescription("Runs " + testSourceSet.getName() + " tests");
@@ -185,8 +254,6 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                     configureTestTaskModularity(project, task);
                 }
             });
-
-            allTestsTask.configure(it -> it.dependsOn(testTaskName));
         });
     }
 
