@@ -8,6 +8,7 @@ import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigure
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerKotlin.configureKotlinTestSourceSets;
 import static name.remal.gradle_plugins.test_source_sets.TestTaskNameUtils.getTestTaskName;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
@@ -60,13 +61,13 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         try {
             project.getPluginManager().apply("jvm-test-suite");
         } catch (UnknownPluginException ignored) {
-            return;
+            // do nothing
         }
 
-        val sourceSets = getExtension(project, SourceSetContainer.class);
         val testSourceSets = createTestSourceSetContainer(project);
-        project.getExtensions().add(TestSourceSetContainer.class, TEST_SOURCE_SETS_EXTENSION_NAME, testSourceSets);
+        addExtension(project, TestSourceSetContainer.class, TEST_SOURCE_SETS_EXTENSION_NAME, testSourceSets);
 
+        val sourceSets = getExtension(project, SourceSetContainer.class);
         val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         testSourceSets.add(testSourceSet);
 

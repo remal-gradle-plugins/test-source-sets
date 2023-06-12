@@ -27,10 +27,13 @@ class TestSourceSetsPluginFunctionalTest {
             build.append("repositories { mavenCentral() }");
             build.append(join(
                 "\n",
-                "testSourceSets.all { SourceSet sourceSet ->",
-                "    project.configurations[sourceSet.implementationConfigurationName].dependencies.add(",
-                "        project.dependencies.create('junit:junit:4.13.2')",
-                "    )",
+                "Dependency junitDependency = dependencies.create('junit:junit:4.13.2')",
+                "project.configurations.with { configurations ->",
+                "    testSourceSets.all { SourceSet sourceSet ->",
+                "        configurations[sourceSet.implementationConfigurationName]",
+                "            .dependencies",
+                "            .add(junitDependency)",
+                "    }",
                 "}"
             ));
         });
