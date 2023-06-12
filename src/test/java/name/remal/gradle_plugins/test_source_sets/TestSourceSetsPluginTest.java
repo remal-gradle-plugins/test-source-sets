@@ -2,7 +2,6 @@ package name.remal.gradle_plugins.test_source_sets;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.findExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestResourceDirs;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
@@ -178,18 +177,6 @@ class TestSourceSetsPluginTest {
                 .contains(configurations.getByName(testSourceSet.getRuntimeOnlyConfigurationName())),
             testSourceSet.getRuntimeOnlyConfigurationName()
         );
-    }
-
-
-    @Test
-    void testTaskNameGetterExtensionIsAdded() {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-
-        val testSourceSet = testSourceSets.getByName(TEST_SOURCE_SET_NAME);
-        assertNotNull(findExtension(testSourceSet, TestTaskNameGetter.class));
-
-        val integrationSourceSet = testSourceSets.create("integrationTest");
-        assertNotNull(findExtension(integrationSourceSet, TestTaskNameGetter.class));
     }
 
 

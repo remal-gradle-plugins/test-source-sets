@@ -7,8 +7,7 @@ import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigure
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerKotlin.configureKotlinTestSourceSets;
-import static name.remal.gradle_plugins.test_source_sets.TestTaskNameGetter.getTestTaskName;
-import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
+import static name.remal.gradle_plugins.test_source_sets.TestTaskNameUtils.getTestTaskName;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
@@ -46,7 +45,6 @@ import org.gradle.util.GradleVersion;
 public class TestSourceSetsPlugin implements Plugin<Project> {
 
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = doNotInline("testSourceSets");
-    public static final String TEST_TASK_NAME_GETTER_EXTENSION_NAME = doNotInline("getTestTaskName");
 
     public static final String ALL_TESTS_TASK_NAME = doNotInline("allTests");
 
@@ -74,7 +72,6 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
         configureConfigurations(project);
         configureClasspaths(project);
-        configureTestTaskNameGetterExtension(project);
         configureTestTasks(project);
         configureJacoco(project);
         configureIdea(project);
@@ -203,19 +200,6 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 sourceSet.getOutput()
                     .plus(mainSourceSet.getOutput())
                     .plus(configurations.getByName(sourceSet.getRuntimeClasspathConfigurationName()))
-            );
-        });
-    }
-
-
-    private static void configureTestTaskNameGetterExtension(Project project) {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.all(testSourceSet -> {
-            addExtension(
-                testSourceSet,
-                TestTaskNameGetter.class,
-                TEST_TASK_NAME_GETTER_EXTENSION_NAME,
-                testSourceSet::getName
             );
         });
     }

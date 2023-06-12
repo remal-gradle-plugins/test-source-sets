@@ -113,7 +113,7 @@ A Gradle plugin that applies `name.remal.test-source-sets` plugin and creates `i
 
 ## Version 3.* to 4.*
 
-`testTaskName` is not a convention property of each test source set, it's an extension of type `Callable<String>`. So, to get a Test task name for a test source set from Groovy code, you have to call `sourceSet.getTestTaskName()` instead of `sourceSet.testTaskName`.
+`testTaskName` convention property is not added anymore to each test source set. Test tasks now have their names equal to test source set names.
 
 `name.remal.integration-tests` plugin creates `integrationTest` test source set instead of `integration`.
 
