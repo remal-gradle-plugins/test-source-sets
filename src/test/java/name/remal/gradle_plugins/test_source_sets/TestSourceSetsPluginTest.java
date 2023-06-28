@@ -9,9 +9,11 @@ import static name.remal.gradle_plugins.toolkit.testkit.ProjectAfterEvaluateActi
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
@@ -67,6 +69,24 @@ class TestSourceSetsPluginTest {
 
         val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         assertTrue(testSourceSets.contains(testSourceSet));
+    }
+
+    @Test
+    void testSourceSetNameIsCheckedForSuffixByDefault() {
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        assertThrows(
+            InvalidTestSourceSetNameSuffix.class,
+            () -> testSourceSets.create("international")
+        );
+    }
+
+    @Test
+    void testSourceSetNameIsNotCheckedForSuffixIfTheCheckIsDisabled() {
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        testSourceSets.getTestSuffixCheck().set(TestSuffixCheckMode.DISABLE);
+        assertDoesNotThrow(
+            () -> testSourceSets.create("international")
+        );
     }
 
     @Test
