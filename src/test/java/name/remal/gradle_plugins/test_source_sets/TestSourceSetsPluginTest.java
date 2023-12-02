@@ -5,6 +5,8 @@ import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestResourceDirs;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
+import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.findMethod;
+import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.getMethod;
 import static name.remal.gradle_plugins.toolkit.testkit.ProjectAfterEvaluateActionsExecutor.executeAfterEvaluateActions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
@@ -21,6 +23,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import name.remal.gradle_plugins.toolkit.SourceSetUtils;
+import name.remal.gradle_plugins.toolkit.reflection.TypedMethod0;
 import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import org.gradle.api.Project;
@@ -31,6 +34,7 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -315,12 +319,27 @@ class TestSourceSetsPluginTest {
             val testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
+            @SuppressWarnings("rawtypes")
+            TypedMethod0<KotlinCompilation, Collection> getAssociatedCompilations = findMethod(
+                KotlinCompilation.class,
+                Collection.class,
+                "getAssociatedCompilations"
+            );
+            if (getAssociatedCompilations == null) {
+                getAssociatedCompilations = getMethod(
+                    KotlinCompilation.class,
+                    Collection.class,
+                    "getAssociateWith"
+                );
+            }
+
             val compilations = kotlin.getTarget().getCompilations();
             val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
-            testSourceSets.forEach(testSourceSet -> {
+            for (val testSourceSet : testSourceSets) {
                 val compilation = compilations.getByName(testSourceSet.getName());
-                assertTrue(compilation.getAssociateWith().contains(mainCompilation), testSourceSet.getName());
-            });
+                val associatedCompilations = getAssociatedCompilations.invoke(compilation);
+                assertTrue(associatedCompilations.contains(mainCompilation), testSourceSet.getName());
+            }
         }
 
     }
