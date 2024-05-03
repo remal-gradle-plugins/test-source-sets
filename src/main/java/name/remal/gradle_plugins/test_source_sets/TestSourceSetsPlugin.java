@@ -10,6 +10,7 @@ import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigure
 import static name.remal.gradle_plugins.test_source_sets.TestTaskNameUtils.getTestTaskName;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtensions;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
@@ -36,8 +37,10 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.UnknownPluginException;
 import org.gradle.api.plugins.jvm.JvmTestSuite;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.base.TestingExtension;
 import org.gradle.util.GradleVersion;
@@ -48,6 +51,8 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = doNotInline("testSourceSets");
 
     public static final String ALL_TESTS_TASK_NAME = doNotInline("allTests");
+
+    public static final String TEST_TASK_EXTENSION_NAME = doNotInline("testTask");
 
 
     private static final boolean IS_MODULARITY_SUPPORTED =
@@ -74,6 +79,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         configureConfigurations(project);
         configureClasspaths(project);
         configureTestTasks(project);
+        configureTestTaskExtensions(project);
         configureJacoco(project);
         configureIdea(project);
         configureEclipse(project);
@@ -246,6 +252,20 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         JavaPluginExtension javaPluginExtension = getExtension(project, JavaPluginExtension.class);
         testTask.getModularity().getInferModulePath()
             .convention(javaPluginExtension.getModularity().getInferModulePath());
+    }
+
+
+    private static void configureTestTaskExtensions(Project project) {
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        testSourceSets.configureEach(testSourceSet -> {
+            val testTaskName = getTestTaskName(testSourceSet);
+            val testTaskProvider = project.getTasks().named(testTaskName, Test.class);
+            getExtensions(testSourceSet).add(
+                new TypeOf<TaskProvider<Test>>() { },
+                TEST_TASK_EXTENSION_NAME,
+                testTaskProvider
+            );
+        });
     }
 
 }

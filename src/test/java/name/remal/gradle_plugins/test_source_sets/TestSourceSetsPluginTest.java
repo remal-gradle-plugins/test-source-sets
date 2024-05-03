@@ -3,6 +3,7 @@ package name.remal.gradle_plugins.test_source_sets;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
+import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtensions;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestResourceDirs;
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
 import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.findMethod;
@@ -29,8 +30,10 @@ import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
@@ -80,7 +83,7 @@ class TestSourceSetsPluginTest {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         assertThrows(
             InvalidTestSourceSetNameSuffix.class,
-            () -> testSourceSets.create("international")
+            () -> testSourceSets.create("integration")
         );
     }
 
@@ -89,7 +92,7 @@ class TestSourceSetsPluginTest {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.getTestSuffixCheck().set(TestSuffixCheckMode.DISABLE);
         assertDoesNotThrow(
-            () -> testSourceSets.create("international")
+            () -> testSourceSets.create("integration")
         );
     }
 
@@ -201,6 +204,28 @@ class TestSourceSetsPluginTest {
                 .contains(configurations.getByName(testSourceSet.getRuntimeOnlyConfigurationName())),
             testSourceSet.getRuntimeOnlyConfigurationName()
         );
+    }
+
+    @Test
+    void testTaskExtensionAddedToEachTestSourceSet() {
+        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        val testTaskProviderType = new TypeOf<TaskProvider<org.gradle.api.tasks.testing.Test>>() { };
+
+        val testSourceSet = testSourceSets.getByName("test");
+        val testTask = project.getTasks().named(
+            testSourceSet.getName(),
+            org.gradle.api.tasks.testing.Test.class
+        ).get();
+        val testTaskProvider = getExtensions(testSourceSet).getByType(testTaskProviderType);
+        assertSame(testTask, testTaskProvider.get());
+
+        val integrationTestSourceSet = testSourceSets.create("integrationTest");
+        val integrationTestTask = project.getTasks().named(
+            integrationTestSourceSet.getName(),
+            org.gradle.api.tasks.testing.Test.class
+        ).get();
+        val integrationTestTaskProvider = getExtensions(integrationTestSourceSet).getByType(testTaskProviderType);
+        assertSame(integrationTestTask, integrationTestTaskProvider.get());
     }
 
 

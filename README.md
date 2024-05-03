@@ -88,6 +88,20 @@ testSourceSets {
 
 A task named `allTests` is created by the plugin. This task simply depends on [Test](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/Test.html) task of each test source set.
 
+## `testTask` extension for all test source sets
+
+Every test source set (including default `test`) has `testTask` extension.
+This extension has type `TaskProvider<Test>`
+and it's a provider of corresponding `Test` task for the current test source set.
+
+It can be used like this:
+
+```groovy
+testSourceSets.configureEach {
+  println testTask.name // prints corresponding name of `Test` task for this source set
+}
+```
+
 ## Kotlin specifics
 
 Internal members of `main` source set **are** accessible in all test source sets. It works for Kotlin Gradle plugin >=1.3.60. The way it's done is described [here](https://youtrack.jetbrains.com/issue/KT-34901#focus=streamItem-27-3810442.0-0).
