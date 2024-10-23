@@ -8,7 +8,9 @@ import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestResourceD
 import static name.remal.gradle_plugins.toolkit.IdeaModuleUtils.getTestSourceDirs;
 import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.findMethod;
 import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.getMethod;
-import static name.remal.gradle_plugins.toolkit.testkit.ProjectAfterEvaluateActionsExecutor.executeAfterEvaluateActions;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.packageNameOf;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
+import static name.remal.gradle_plugins.toolkit.testkit.ProjectValidations.executeAfterEvaluateActions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME;
@@ -27,6 +29,7 @@ import name.remal.gradle_plugins.toolkit.SourceSetUtils;
 import name.remal.gradle_plugins.toolkit.reflection.TypedMethod0;
 import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
+import name.remal.gradle_plugins.toolkit.testkit.TaskValidations;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -46,6 +49,20 @@ class TestSourceSetsPluginTest {
 
     @ApplyPlugin(type = TestSourceSetsPlugin.class)
     private final Project project;
+
+    
+    @Test
+    void pluginTasksDoNotHavePropertyProblems() {
+        executeAfterEvaluateActions(project);
+
+        val taskClassNamePrefix = packageNameOf(TestSourceSetsPlugin.class) + '.';
+        project.getTasks().stream()
+            .filter(task -> {
+                val taskClass = unwrapGeneratedSubclass(task.getClass());
+                return taskClass.getName().startsWith(taskClassNamePrefix);
+            })
+            .forEach(TaskValidations::assertNoTaskPropertiesProblems);
+    }
 
 
     @Test
