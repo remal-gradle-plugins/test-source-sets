@@ -30,6 +30,7 @@ import name.remal.gradle_plugins.toolkit.reflection.TypedMethod0;
 import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.TaskValidations;
+import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -50,7 +51,7 @@ class TestSourceSetsPluginTest {
     @ApplyPlugin(type = TestSourceSetsPlugin.class)
     private final Project project;
 
-    
+
     @Test
     void pluginTasksDoNotHavePropertyProblems() {
         executeAfterEvaluateActions(project);
@@ -375,7 +376,9 @@ class TestSourceSetsPluginTest {
                 );
             }
 
-            val compilations = kotlin.getTarget().getCompilations();
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            NamedDomainObjectContainer<KotlinCompilation> compilations =
+                (NamedDomainObjectContainer) kotlin.getTarget().getCompilations();
             val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
             for (val testSourceSet : testSourceSets) {
                 val compilation = compilations.getByName(testSourceSet.getName());
