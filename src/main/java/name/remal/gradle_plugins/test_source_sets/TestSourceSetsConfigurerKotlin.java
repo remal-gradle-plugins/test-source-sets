@@ -25,8 +25,10 @@ abstract class TestSourceSetsConfigurerKotlin {
             "kotlin2js",
             "kotlin-platform-common"
         );
-        withAnyOfPlugins(project.getPluginManager(), kotlinPlugins, __ ->
-            configureKotlinTarget(project)
+        withAnyOfPlugins(
+            project.getPluginManager(),
+            kotlinPlugins,
+            __ -> configureKotlinTarget(project)
         );
     }
 
@@ -76,10 +78,12 @@ abstract class TestSourceSetsConfigurerKotlin {
             return;
         }
 
-        testSourceSets.all(testSourceSet ->
-            compilations.matching(it -> it.getName().equals(testSourceSet.getName())).all(compilation ->
-                associateWith.invoke(compilation, mainCompilation)
-            )
+        testSourceSets.configureEach(testSourceSet ->
+            compilations
+                .matching(it -> it.getName().equals(testSourceSet.getName()))
+                .configureEach(compilation ->
+                    associateWith.invoke(compilation, mainCompilation)
+                )
         );
     }
 

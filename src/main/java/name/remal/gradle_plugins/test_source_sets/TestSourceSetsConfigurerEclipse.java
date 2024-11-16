@@ -23,9 +23,12 @@ abstract class TestSourceSetsConfigurerEclipse {
             return;
         }
 
-        project.getPluginManager().withPlugin("eclipse", __ -> {
-            afterEvaluateOrNow(project, ___ -> configureEclipseImpl(project));
-        });
+        project.getPluginManager().withPlugin(
+            "eclipse",
+            __ -> {
+                afterEvaluateOrNow(project, ___ -> configureEclipseImpl(project));
+            }
+        );
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -33,7 +36,7 @@ abstract class TestSourceSetsConfigurerEclipse {
         val eclipseModel = getExtension(project, EclipseModel.class);
         val eclipseClasspath = eclipseModel.getClasspath();
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.all(testSourceSet -> {
+        testSourceSets.configureEach(testSourceSet -> {
             eclipseClasspath.getTestSourceSets().add(testSourceSet);
             eclipseClasspath.getTestConfigurations().addAll(
                 getSourceSetConfigurationNames(testSourceSet).stream()

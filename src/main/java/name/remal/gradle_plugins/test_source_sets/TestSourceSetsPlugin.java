@@ -111,19 +111,26 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             }
         };
 
-        val testSourceSets = project.container(SourceSet.class, name -> {
-            checkTestSourceSetName.accept(name);
-            return createSourceSet(project, name);
-        });
+        val testSourceSets = project.container(
+            SourceSet.class,
+            name -> {
+                checkTestSourceSetName.accept(name);
+                return createSourceSet(project, name);
+            }
+        );
 
         val sourceSets = getExtension(project, SourceSetContainer.class);
         sourceSets.whenObjectRemoved(testSourceSets::remove);
         testSourceSets.whenObjectRemoved(sourceSets::remove);
 
         val getTestSuffixCheckMethod = TestSourceSetContainer.class.getMethod("getTestSuffixCheck");
-        return toDynamicInterface(testSourceSets, TestSourceSetContainer.class, invocationHandler -> {
-            invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
-        });
+        return toDynamicInterface(
+            testSourceSets,
+            TestSourceSetContainer.class,
+            invocationHandler -> {
+                invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
+            }
+        );
     }
 
     private static SourceSet createSourceSet(Project project, String name) {
@@ -152,14 +159,21 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
         val testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet ->
-            forConfigurations(testSourceSet, sourceSet, (testConfigurationName, configurationName) -> {
-                configurations.matching(it -> it.getName().equals(testConfigurationName)).all(testConfiguration ->
-                    configurations.matching(it -> it.getName().equals(configurationName)).all(configuration ->
-                        configuration.extendsFrom(testConfiguration)
-                    )
-                );
-            })
+        testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet ->
+            forConfigurations(
+                testSourceSet,
+                sourceSet,
+                (testConfigurationName, configurationName) -> {
+                    configurations
+                        .matching(it -> it.getName().equals(testConfigurationName))
+                        .all(testConfiguration ->
+                            configurations.matching(it -> it.getName().equals(configurationName))
+                                .all(configuration ->
+                                    configuration.extendsFrom(testConfiguration)
+                                )
+                        );
+                }
+            )
         );
     }
 
@@ -198,7 +212,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val configurations = project.getConfigurations();
 
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.matching(it -> it != testSourceSet).all(sourceSet -> {
+        testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet -> {
             sourceSet.setCompileClasspath(
                 mainSourceSet.getOutput()
                     .plus(configurations.getByName(sourceSet.getCompileClasspathConfigurationName()))
@@ -213,11 +227,13 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
 
     private static void configureTestTasks(Project project) {
-        val allTestsTask = project.getTasks().register(ALL_TESTS_TASK_NAME, task -> {
-            task.setGroup(VERIFICATION_GROUP);
-            task.setDescription("Run test task for each test-source-set");
-            task.dependsOn(TEST_TASK_NAME);
-        });
+        val allTestsTask = project.getTasks().register(
+            ALL_TESTS_TASK_NAME, task -> {
+                task.setGroup(VERIFICATION_GROUP);
+                task.setDescription("Run test task for each test-source-set");
+                task.dependsOn(TEST_TASK_NAME);
+            }
+        );
 
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.whenObjectAdded(testSourceSet -> {
@@ -228,23 +244,25 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 return;
             }
 
-            project.getTasks().register(testTaskName, Test.class, task -> {
-                task.setGroup(VERIFICATION_GROUP);
-                task.setDescription("Runs " + testSourceSet.getName() + " tests");
+            project.getTasks().register(
+                testTaskName, Test.class, task -> {
+                    task.setGroup(VERIFICATION_GROUP);
+                    task.setDescription("Runs " + testSourceSet.getName() + " tests");
 
-                ConventionMapping conventionMapping = task.getConventionMapping();
-                conventionMapping.map(
-                    "testClassesDirs",
-                    (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
-                );
-                conventionMapping.map(
-                    "classpath",
-                    (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
-                );
-                if (IS_MODULARITY_SUPPORTED) {
-                    configureTestTaskModularity(project, task);
+                    ConventionMapping conventionMapping = task.getConventionMapping();
+                    conventionMapping.map(
+                        "testClassesDirs",
+                        (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
+                    );
+                    conventionMapping.map(
+                        "classpath",
+                        (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
+                    );
+                    if (IS_MODULARITY_SUPPORTED) {
+                        configureTestTaskModularity(project, task);
+                    }
                 }
-            });
+            );
         });
     }
 

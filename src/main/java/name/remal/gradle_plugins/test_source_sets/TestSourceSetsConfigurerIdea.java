@@ -20,9 +20,12 @@ import org.gradle.plugins.ide.idea.model.IdeaModule;
 abstract class TestSourceSetsConfigurerIdea {
 
     public static void configureIdea(Project project) {
-        project.getPluginManager().withPlugin("idea", __ -> {
-            afterEvaluateOrNow(project, ___ -> configureIdeaImpl(project));
-        });
+        project.getPluginManager().withPlugin(
+            "idea",
+            __ -> {
+                afterEvaluateOrNow(project, ___ -> configureIdeaImpl(project));
+            }
+        );
     }
 
     private static void configureIdeaImpl(Project project) {
@@ -36,8 +39,8 @@ abstract class TestSourceSetsConfigurerIdea {
     private static void configureIdeaModule(Project project, IdeaModule module) {
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        testSourceSets.all(testSourceSet -> {
-            project.getConfigurations().all(conf -> {
+        testSourceSets.configureEach(testSourceSet -> {
+            project.getConfigurations().configureEach(conf -> {
                 if (conf.getName().equals(testSourceSet.getCompileClasspathConfigurationName())
                     || conf.getName().equals(testSourceSet.getRuntimeClasspathConfigurationName())
                 ) {
