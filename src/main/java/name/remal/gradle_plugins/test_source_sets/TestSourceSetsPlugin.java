@@ -88,6 +88,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
     @SneakyThrows
+    @SuppressWarnings("Slf4jFormatShouldBeConst")
     private static TestSourceSetContainer createTestSourceSetContainer(Project project) {
         val testSuffixCheck = project.getObjects().property(TestSuffixCheckMode.class);
         testSuffixCheck.convention(TestSuffixCheckMode.FAIL);
@@ -95,9 +96,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         Consumer<String> checkTestSourceSetName = name -> {
             if (!name.endsWith("Test")) {
                 val message = format(
-                    "Test source set name does NOT end with \"Test\": \"%s\". It violates principles of"
-                        + " `jvm-test-suite` Gradle plugin. Please add \"Test\" suffix to the test source set name."
-                        + " If you want to configure or completely disable this check, see the plugin's"
+                    "Test source set name does NOT end with `Test`: `%s`. It violates principles of"
+                        + " `jvm-test-suite` Gradle plugin. Please add `Test` suffix to the test source set name."
+                        + " If you want to configure or disable this check, see the plugin's"
                         + " documentation: %s#test-source-set-name-suffix-check",
                     name,
                     PLUGIN_REPOSITORY_HTML_URL
