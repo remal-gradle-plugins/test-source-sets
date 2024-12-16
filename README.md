@@ -8,7 +8,13 @@
 
 Usage:
 
-<!--plugin-usage:name.remal.test-source-sets--><!--/plugin-usage-->
+<!--plugin-usage:name.remal.test-source-sets-->
+```groovy
+plugins {
+    id 'name.remal.test-source-sets' version '4.1.7'
+}
+```
+<!--/plugin-usage-->
 
 &nbsp;
 
@@ -118,7 +124,13 @@ Internal members of `main` source set **are** accessible in all test source sets
 
 Usage:
 
-<!--plugin-usage:name.remal.integration-tests--><!--/plugin-usage-->
+<!--plugin-usage:name.remal.integration-tests-->
+```groovy
+plugins {
+    id 'name.remal.integration-tests' version '4.1.7'
+}
+```
+<!--/plugin-usage-->
 
 &nbsp;
 
