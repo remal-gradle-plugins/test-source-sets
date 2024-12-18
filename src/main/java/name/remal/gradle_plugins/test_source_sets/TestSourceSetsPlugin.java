@@ -125,13 +125,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         testSourceSets.whenObjectRemoved(sourceSets::remove);
 
         val getTestSuffixCheckMethod = TestSourceSetContainer.class.getMethod("getTestSuffixCheck");
-        return toDynamicInterface(
-            testSourceSets,
-            TestSourceSetContainer.class,
-            invocationHandler -> {
-                invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
-            }
-        );
+        return toDynamicInterface(testSourceSets, TestSourceSetContainer.class, invocationHandler -> {
+            invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
+        });
     }
 
     private static SourceSet createSourceSet(Project project, String name) {
@@ -161,20 +157,15 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet ->
-            forConfigurations(
-                testSourceSet,
-                sourceSet,
-                (testConfigurationName, configurationName) -> {
-                    configurations
-                        .matching(it -> it.getName().equals(testConfigurationName))
-                        .all(testConfiguration ->
-                            configurations.matching(it -> it.getName().equals(configurationName))
-                                .all(configuration ->
-                                    configuration.extendsFrom(testConfiguration)
-                                )
-                        );
-                }
-            )
+            forConfigurations(testSourceSet, sourceSet, (testConfName, confName) -> {
+                configurations
+                    .matching(it -> it.getName().equals(testConfName))
+                    .all(testConf ->
+                        configurations.matching(it -> it.getName().equals(confName)).all(conf ->
+                            conf.extendsFrom(testConf)
+                        )
+                    );
+            })
         );
     }
 
@@ -193,16 +184,16 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         BiConsumer<String, String> action
     ) {
         for (val method : GET_CONFIGURATION_NAME_METHODS) {
-            val configurationName1 = method.invoke(sourceSet1);
-            val configurationName2 = method.invoke(sourceSet2);
-            if (configurationName1 == null
-                || configurationName2 == null
-                || Objects.equals(configurationName1, configurationName2)
+            val confName1 = method.invoke(sourceSet1);
+            val confName2 = method.invoke(sourceSet2);
+            if (confName1 == null
+                || confName2 == null
+                || Objects.equals(confName1, confName2)
             ) {
                 continue;
             }
 
-            action.accept(configurationName1.toString(), configurationName2.toString());
+            action.accept(confName1.toString(), confName2.toString());
         }
     }
 
@@ -210,18 +201,18 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         val sourceSets = getExtension(project, SourceSetContainer.class);
         val mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
         val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val configurations = project.getConfigurations();
+        val confs = project.getConfigurations();
 
         val testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet -> {
             sourceSet.setCompileClasspath(
                 mainSourceSet.getOutput()
-                    .plus(configurations.getByName(sourceSet.getCompileClasspathConfigurationName()))
+                    .plus(confs.getByName(sourceSet.getCompileClasspathConfigurationName()))
             );
             sourceSet.setRuntimeClasspath(
                 sourceSet.getOutput()
                     .plus(mainSourceSet.getOutput())
-                    .plus(configurations.getByName(sourceSet.getRuntimeClasspathConfigurationName()))
+                    .plus(confs.getByName(sourceSet.getRuntimeClasspathConfigurationName()))
             );
         });
     }
@@ -245,25 +236,23 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 return;
             }
 
-            project.getTasks().register(
-                testTaskName, Test.class, task -> {
-                    task.setGroup(VERIFICATION_GROUP);
-                    task.setDescription("Runs " + testSourceSet.getName() + " tests");
+            project.getTasks().register(testTaskName, Test.class, task -> {
+                task.setGroup(VERIFICATION_GROUP);
+                task.setDescription("Runs " + testSourceSet.getName() + " tests");
 
-                    ConventionMapping conventionMapping = task.getConventionMapping();
-                    conventionMapping.map(
-                        "testClassesDirs",
-                        (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
-                    );
-                    conventionMapping.map(
-                        "classpath",
-                        (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
-                    );
-                    if (IS_MODULARITY_SUPPORTED) {
-                        configureTestTaskModularity(project, task);
-                    }
+                ConventionMapping conventionMapping = task.getConventionMapping();
+                conventionMapping.map(
+                    "testClassesDirs",
+                    (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
+                );
+                conventionMapping.map(
+                    "classpath",
+                    (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
+                );
+                if (IS_MODULARITY_SUPPORTED) {
+                    configureTestTaskModularity(project, task);
                 }
-            );
+            });
         });
     }
 
