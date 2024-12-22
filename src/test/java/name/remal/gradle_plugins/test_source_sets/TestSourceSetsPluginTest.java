@@ -38,6 +38,7 @@ import org.gradle.api.reflect.TypeOf;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
@@ -344,6 +345,27 @@ class TestSourceSetsPluginTest {
 
             assertNotNull(project.getTasks().findByName("jacocoIntegrationTestReport"));
             assertNotNull(project.getTasks().findByName("jacocoIntegrationTestCoverageVerification"));
+        }
+
+    }
+
+
+    @Nested
+    class IfJavaGradlePluginIsApplied {
+
+        {
+            project.getPluginManager().apply("java-gradle-plugin");
+        }
+
+        @Test
+        void test() {
+            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            testSourceSets.create("integrationTest");
+
+            val gradlePluginDev = getExtension(project, GradlePluginDevelopmentExtension.class);
+            assertThat(gradlePluginDev.getTestSourceSets())
+                .isNotEmpty()
+                .contains(testSourceSets.getByName("test"), testSourceSets.getByName("integrationTest"));
         }
 
     }

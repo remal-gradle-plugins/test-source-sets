@@ -20,12 +20,9 @@ import org.gradle.plugins.ide.idea.model.IdeaModule;
 abstract class TestSourceSetsConfigurerIdea {
 
     public static void configureIdea(Project project) {
-        project.getPluginManager().withPlugin(
-            "idea",
-            __ -> {
-                afterEvaluateOrNow(project, ___ -> configureIdeaImpl(project));
-            }
-        );
+        project.getPluginManager().withPlugin("idea", __ -> {
+            afterEvaluateOrNow(project, ___ -> configureIdeaImpl(project));
+        });
     }
 
     private static void configureIdeaImpl(Project project) {

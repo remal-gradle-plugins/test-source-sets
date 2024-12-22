@@ -23,12 +23,9 @@ abstract class TestSourceSetsConfigurerEclipse {
             return;
         }
 
-        project.getPluginManager().withPlugin(
-            "eclipse",
-            __ -> {
-                afterEvaluateOrNow(project, ___ -> configureEclipseImpl(project));
-            }
-        );
+        project.getPluginManager().withPlugin("eclipse", __ -> {
+            afterEvaluateOrNow(project, ___ -> configureEclipseImpl(project));
+        });
     }
 
     @SuppressWarnings("UnstableApiUsage")

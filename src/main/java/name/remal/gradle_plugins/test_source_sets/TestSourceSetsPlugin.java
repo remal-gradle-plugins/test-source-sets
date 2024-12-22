@@ -6,6 +6,7 @@ import static name.remal.gradle_plugins.test_source_sets.DocUtils.PLUGIN_REPOSIT
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerEclipse.configureEclipse;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
+import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJavaGradlePlugin.configureJavaGradlePlugin;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerKotlin.configureKotlinTestSourceSets;
 import static name.remal.gradle_plugins.test_source_sets.TestTaskNameUtils.getTestTaskName;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
@@ -85,6 +86,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         configureEclipse(project);
 
         configureKotlinTestSourceSets(project);
+        configureJavaGradlePlugin(project);
     }
 
     @SneakyThrows

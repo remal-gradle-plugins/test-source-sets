@@ -24,17 +24,14 @@ import org.gradle.testing.jacoco.tasks.JacocoReport;
 abstract class TestSourceSetsConfigurerJacoco {
 
     public static void configureJacoco(Project project) {
-        project.getPluginManager().withPlugin(
-            "jacoco",
-            __ -> {
-                val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-                testSourceSets.configureEach(sourceSet -> {
-                    val testTask = project.getTasks().named(getTestTaskName(sourceSet), Test.class);
-                    createJacocoReportTask(project, testTask);
-                    createJacocoCoverageVerificationTask(project, testTask);
-                });
-            }
-        );
+        project.getPluginManager().withPlugin("jacoco", __ -> {
+            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            testSourceSets.configureEach(sourceSet -> {
+                val testTask = project.getTasks().named(getTestTaskName(sourceSet), Test.class);
+                createJacocoReportTask(project, testTask);
+                createJacocoCoverageVerificationTask(project, testTask);
+            });
+        });
     }
 
     private static void createJacocoReportTask(Project project, TaskProvider<?> testTask) {
