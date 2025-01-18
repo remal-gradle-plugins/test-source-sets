@@ -1,7 +1,7 @@
 package name.remal.gradle_plugins.test_source_sets;
 
+import static java.lang.String.join;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
-import static name.remal.gradle_plugins.toolkit.StringUtils.escapeGroovy;
 import static name.remal.gradle_plugins.toolkit.testkit.GradleDependencyVersions.getCorrespondingKotlinVersion;
 
 import lombok.RequiredArgsConstructor;
@@ -14,17 +14,16 @@ import org.junit.jupiter.api.Test;
 @RequiredArgsConstructor
 class TestSourceSetsPluginFunctionalTest {
 
-    private final GradleProject project;
+    final GradleProject project;
 
     @BeforeEach
     void beforeEach() {
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.test-source-sets");
-            build.append("testSourceSets { additionalTest }");
-            build.registerDefaultTask(ALL_TESTS_TASK_NAME);
+            build.line("testSourceSets { additionalTest }");
 
-            build.append("repositories { mavenCentral() }");
-            build.append(
+            build.line("repositories { mavenCentral() }");
+            build.line(join("\n", new String[]{
                 "Dependency junitDependency = dependencies.create('junit:junit:4.13.2')",
                 "project.configurations.with { configurations ->",
                 "    testSourceSets.all { SourceSet sourceSet ->",
@@ -49,10 +48,10 @@ class TestSourceSetsPluginFunctionalTest {
                 "        stackTraceFilters('GROOVY')",
                 "    }",
                 "}",
-                ""
-            );
+                "",
+            }));
 
-            build.append(
+            build.line(join("\n", new String[]{
                 "file(\"src/test/java/pkg/JavaTest.java\").with {",
                 "    parentFile.mkdirs()",
                 "    write([",
@@ -65,9 +64,9 @@ class TestSourceSetsPluginFunctionalTest {
                 "    ].join('\\n'), 'UTF-8')",
                 "}",
                 ""
-            );
+            }));
 
-            build.append(
+            build.line(join("\n", new String[]{
                 "file(\"src/additionalTest/java/pkg/JavaAdditionalTest.java\").with {",
                 "    parentFile.mkdirs()",
                 "    write([",
@@ -80,33 +79,32 @@ class TestSourceSetsPluginFunctionalTest {
                 "    ].join('\\n'), 'UTF-8')",
                 "}",
                 ""
-            );
+            }));
         });
     }
 
     @Test
     void emptyBuildPerformsSuccessfully() {
-        project.getBuildFile().append(
+        project.getBuildFile().line(join("\n", new String[]{
             "file(\"src/test/java\").deleteDir()",
             "file(\"src/additionalTest/java\").deleteDir()",
             ""
-        );
+        }));
 
-        project.assertBuildSuccessfully();
+        project.assertBuildSuccessfully(ALL_TESTS_TASK_NAME);
     }
 
     @Test
     void nonEmptyBuildPerformsSuccessfully() {
-        project.assertBuildSuccessfully();
+        project.assertBuildSuccessfully(ALL_TESTS_TASK_NAME);
     }
 
     @Test
     void buildWithJacocoPerformsSuccessfully() {
         project.forBuildFile(build -> {
             build.applyPlugin("jacoco");
-            build.registerDefaultTask("jacocoAdditionalTestReport");
         });
-        project.assertBuildSuccessfully();
+        project.assertBuildSuccessfully("jacocoAdditionalTestReport");
     }
 
     @Test
@@ -116,8 +114,8 @@ class TestSourceSetsPluginFunctionalTest {
             val kotlinVersion = getCorrespondingKotlinVersion();
             build.applyPlugin("org.jetbrains.kotlin.jvm", kotlinVersion);
 
-            build.append(
-                "dependencies { api 'org.jetbrains.kotlin:kotlin-stdlib:" + escapeGroovy(kotlinVersion) + "' }",
+            build.line(join("\n", new String[]{
+                "dependencies { api 'org.jetbrains.kotlin:kotlin-stdlib:" + build.escapeString(kotlinVersion) + "' }",
                 "file(\"src/main/kotlin/pkg/kotlinFile.kt\").with {",
                 "    parentFile.mkdirs()",
                 "    write([",
@@ -140,12 +138,12 @@ class TestSourceSetsPluginFunctionalTest {
                 "    ].join('\\n'), 'UTF-8')",
                 "}",
                 ""
-            );
+            }));
         });
 
         project.withoutConfigurationCache();
 
-        project.assertBuildSuccessfully();
+        project.assertBuildSuccessfully(ALL_TESTS_TASK_NAME);
     }
 
 }
