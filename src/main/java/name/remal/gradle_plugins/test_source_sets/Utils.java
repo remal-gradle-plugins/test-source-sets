@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import lombok.val;
 
 interface Utils {
 
@@ -27,7 +26,7 @@ interface Utils {
         BiConsumer<T, Set<E>> setter,
         Consumer<Set<E>> action
     ) {
-        val set = new LinkedHashSet<>(
+        var set = new LinkedHashSet<>(
             Optional.ofNullable(getter.apply(object)).orElse(emptySet())
         );
         action.accept(set);
@@ -40,7 +39,7 @@ interface Utils {
         BiConsumer<T, Map<K, V>> setter,
         Consumer<Map<K, V>> action
     ) {
-        val map = new LinkedHashMap<>(
+        var map = new LinkedHashMap<>(
             Optional.ofNullable(getter.apply(object)).orElse(emptyMap())
         );
         action.accept(map);

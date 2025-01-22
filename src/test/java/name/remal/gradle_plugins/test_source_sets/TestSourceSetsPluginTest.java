@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collection;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.SourceSetUtils;
 import name.remal.gradle_plugins.toolkit.reflection.TypedMethod0;
 import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
@@ -57,10 +56,10 @@ class TestSourceSetsPluginTest {
     void pluginTasksDoNotHavePropertyProblems() {
         executeAfterEvaluateActions(project);
 
-        val taskClassNamePrefix = packageNameOf(TestSourceSetsPlugin.class) + '.';
+        var taskClassNamePrefix = packageNameOf(TestSourceSetsPlugin.class) + '.';
         project.getTasks().stream()
             .filter(task -> {
-                val taskClass = unwrapGeneratedSubclass(task.getClass());
+                var taskClass = unwrapGeneratedSubclass(task.getClass());
                 return taskClass.getName().startsWith(taskClassNamePrefix);
             })
             .map(TaskValidations::markTaskDependenciesAsSkipped)
@@ -91,16 +90,16 @@ class TestSourceSetsPluginTest {
 
     @Test
     void containsTestSourceSet() {
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         assertTrue(testSourceSets.contains(testSourceSet));
     }
 
     @Test
     void testSourceSetNameIsCheckedForSuffixByDefault() {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         assertThrows(
             InvalidTestSourceSetNameSuffix.class,
             () -> testSourceSets.create("integration")
@@ -109,7 +108,7 @@ class TestSourceSetsPluginTest {
 
     @Test
     void testSourceSetNameIsNotCheckedForSuffixIfTheCheckIsDisabled() {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.getTestSuffixCheck().set(TestSuffixCheckMode.DISABLE);
         assertDoesNotThrow(
             () -> testSourceSets.create("integration")
@@ -118,42 +117,42 @@ class TestSourceSetsPluginTest {
 
     @Test
     void creatingInTestSourceSetsCreatesInSourceSets() {
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val anotherTestSourceSet = testSourceSets.create("anotherTest");
+        var anotherTestSourceSet = testSourceSets.create("anotherTest");
         assertTrue(sourceSets.contains(anotherTestSourceSet));
         assertTrue(testSourceSets.contains(anotherTestSourceSet));
     }
 
     @Test
     void removalFromSourceSetsRemovesFromTestSourceSets() {
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         sourceSets.remove(testSourceSet);
         assertFalse(testSourceSets.contains(testSourceSet));
     }
 
     @Test
     void removalFromTestSourceSetsRemovesFromSourceSets() {
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         testSourceSets.remove(testSourceSet);
         assertFalse(testSourceSets.contains(testSourceSet));
     }
 
     @Test
     void compileClasspathConfigurationsOfTestSourceSetsExtendCorrespondingConfigurationOfTestSourceSet() {
-        val configurations = project.getConfigurations();
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var configurations = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val integrationSourceSet = testSourceSets.create("integrationTest");
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var integrationSourceSet = testSourceSets.create("integrationTest");
         assertTrue(
             configurations.getByName(integrationSourceSet.getCompileClasspathConfigurationName())
                 .getExtendsFrom()
@@ -164,12 +163,12 @@ class TestSourceSetsPluginTest {
 
     @Test
     void runtimeClasspathConfigurationsOfTestSourceSetsExtendCorrespondingConfigurationOfTestSourceSet() {
-        val configurations = project.getConfigurations();
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var configurations = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val integrationSourceSet = testSourceSets.create("integrationTest");
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var integrationSourceSet = testSourceSets.create("integrationTest");
         assertTrue(
             configurations.getByName(integrationSourceSet.getRuntimeClasspathConfigurationName())
                 .getExtendsFrom()
@@ -180,12 +179,12 @@ class TestSourceSetsPluginTest {
 
     @Test
     void implementationConfigurationsOfTestSourceSetsExtendCorrespondingConfigurationOfTestSourceSet() {
-        val configurations = project.getConfigurations();
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var configurations = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val integrationSourceSet = testSourceSets.create("integrationTest");
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var integrationSourceSet = testSourceSets.create("integrationTest");
         assertTrue(
             configurations.getByName(integrationSourceSet.getImplementationConfigurationName())
                 .getExtendsFrom()
@@ -196,12 +195,12 @@ class TestSourceSetsPluginTest {
 
     @Test
     void compileOnlyConfigurationsOfTestSourceSetsExtendCorrespondingConfigurationOfTestSourceSet() {
-        val configurations = project.getConfigurations();
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var configurations = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val integrationSourceSet = testSourceSets.create("integrationTest");
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var integrationSourceSet = testSourceSets.create("integrationTest");
         assertTrue(
             configurations.getByName(integrationSourceSet.getCompileOnlyConfigurationName())
                 .getExtendsFrom()
@@ -212,12 +211,12 @@ class TestSourceSetsPluginTest {
 
     @Test
     void runtimeOnlyConfigurationsOfTestSourceSetsExtendCorrespondingConfigurationOfTestSourceSet() {
-        val configurations = project.getConfigurations();
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var configurations = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val integrationSourceSet = testSourceSets.create("integrationTest");
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var integrationSourceSet = testSourceSets.create("integrationTest");
         assertTrue(
             configurations.getByName(integrationSourceSet.getRuntimeOnlyConfigurationName())
                 .getExtendsFrom()
@@ -228,23 +227,23 @@ class TestSourceSetsPluginTest {
 
     @Test
     void testTaskExtensionAddedToEachTestSourceSet() {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        val testTaskProviderType = new TypeOf<TaskProvider<org.gradle.api.tasks.testing.Test>>() { };
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testTaskProviderType = new TypeOf<TaskProvider<org.gradle.api.tasks.testing.Test>>() { };
 
-        val testSourceSet = testSourceSets.getByName("test");
-        val testTask = project.getTasks().named(
+        var testSourceSet = testSourceSets.getByName("test");
+        var testTask = project.getTasks().named(
             testSourceSet.getName(),
             org.gradle.api.tasks.testing.Test.class
         ).get();
-        val testTaskProvider = getExtensions(testSourceSet).getByType(testTaskProviderType);
+        var testTaskProvider = getExtensions(testSourceSet).getByType(testTaskProviderType);
         assertSame(testTask, testTaskProvider.get());
 
-        val integrationTestSourceSet = testSourceSets.create("integrationTest");
-        val integrationTestTask = project.getTasks().named(
+        var integrationTestSourceSet = testSourceSets.create("integrationTest");
+        var integrationTestTask = project.getTasks().named(
             integrationTestSourceSet.getName(),
             org.gradle.api.tasks.testing.Test.class
         ).get();
-        val integrationTestTaskProvider = getExtensions(integrationTestSourceSet).getByType(testTaskProviderType);
+        var integrationTestTaskProvider = getExtensions(integrationTestSourceSet).getByType(testTaskProviderType);
         assertSame(integrationTestTask, integrationTestTaskProvider.get());
     }
 
@@ -257,10 +256,10 @@ class TestSourceSetsPluginTest {
         private final org.gradle.api.tasks.testing.Test integrationTestTask;
 
         {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             integrationSourceSet = testSourceSets.create("integrationTest");
 
-            val testTasks = project.getTasks().withType(org.gradle.api.tasks.testing.Test.class);
+            var testTasks = project.getTasks().withType(org.gradle.api.tasks.testing.Test.class);
             testTask = testTasks.findByName("test");
             integrationTestTask = testTasks.findByName("integrationTest");
         }
@@ -340,7 +339,7 @@ class TestSourceSetsPluginTest {
 
         @Test
         void correspondingReportTaskIsCreatedForCreatedTestTasks() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("integrationTest");
 
             assertNotNull(project.getTasks().findByName("jacocoIntegrationTestReport"));
@@ -359,10 +358,10 @@ class TestSourceSetsPluginTest {
 
         @Test
         void test() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("integrationTest");
 
-            val gradlePluginDev = getExtension(project, GradlePluginDevelopmentExtension.class);
+            var gradlePluginDev = getExtension(project, GradlePluginDevelopmentExtension.class);
             assertThat(gradlePluginDev.getTestSourceSets())
                 .isNotEmpty()
                 .contains(testSourceSets.getByName("test"), testSourceSets.getByName("integrationTest"));
@@ -381,8 +380,8 @@ class TestSourceSetsPluginTest {
         @Test
         @MinSupportedGradleVersion("6.1")
         void allTestSourceSetsAreAssociatedWithMainCompilation() {
-            val kotlin = getExtension(project, KotlinSingleTargetExtension.class);
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var kotlin = getExtension(project, KotlinSingleTargetExtension.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
             @SuppressWarnings("rawtypes")
@@ -402,10 +401,10 @@ class TestSourceSetsPluginTest {
             @SuppressWarnings({"unchecked", "rawtypes"})
             NamedDomainObjectContainer<KotlinCompilation> compilations =
                 (NamedDomainObjectContainer) kotlin.getTarget().getCompilations();
-            val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
-            for (val testSourceSet : testSourceSets) {
-                val compilation = compilations.getByName(testSourceSet.getName());
-                val associatedCompilations = getAssociatedCompilations.invoke(compilation);
+            var mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
+            for (var testSourceSet : testSourceSets) {
+                var compilation = compilations.getByName(testSourceSet.getName());
+                var associatedCompilations = getAssociatedCompilations.invoke(compilation);
                 assertTrue(associatedCompilations.contains(mainCompilation), testSourceSet.getName());
             }
         }
@@ -423,55 +422,55 @@ class TestSourceSetsPluginTest {
 
         @Test
         void compileClasspathConfigurationIsAddedToIdeaModuleScopeTest() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-            val anotherTestSourceSet = testSourceSets.create("anotherTest");
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var anotherTestSourceSet = testSourceSets.create("anotherTest");
 
-            val compileClasspathConfiguration = project.getConfigurations().getByName(
+            var compileClasspathConfiguration = project.getConfigurations().getByName(
                 anotherTestSourceSet.getCompileClasspathConfigurationName()
             );
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val scopes = module.getScopes();
+            var scopes = module.getScopes();
             assertNotNull(scopes, "idea.module.scopes");
-            val testScope = scopes.get("TEST");
+            var testScope = scopes.get("TEST");
             assertNotNull(testScope, "idea.module.scopes.TEST");
-            val testPlusScope = testScope.get("plus");
+            var testPlusScope = testScope.get("plus");
             assertNotNull(testPlusScope, "idea.module.scopes.TEST.plus");
             assertTrue(testPlusScope.contains(compileClasspathConfiguration));
         }
 
         @Test
         void runtimeClasspathConfigurationIsAddedToIdeaModuleScopeTest() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-            val anotherTestSourceSet = testSourceSets.create("anotherTest");
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var anotherTestSourceSet = testSourceSets.create("anotherTest");
 
-            val runtimeClasspathConfiguration = project.getConfigurations().getByName(
+            var runtimeClasspathConfiguration = project.getConfigurations().getByName(
                 anotherTestSourceSet.getRuntimeClasspathConfigurationName()
             );
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val scopes = module.getScopes();
+            var scopes = module.getScopes();
             assertNotNull(scopes, "idea.module.scopes");
-            val testScope = scopes.get("TEST");
+            var testScope = scopes.get("TEST");
             assertNotNull(testScope, "idea.module.scopes.TEST");
-            val testPlusScope = testScope.get("plus");
+            var testPlusScope = testScope.get("plus");
             assertNotNull(testPlusScope, "idea.module.scopes.TEST.plus");
             assertTrue(testPlusScope.contains(runtimeClasspathConfiguration));
         }
 
         @Test
         void ideaModuleTestSourceDirsContainsDirsOfAllTestSourceSets() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val testSourceDirs = getTestSourceDirs(module);
+            var testSourceDirs = getTestSourceDirs(module);
             assertNotNull(testSourceDirs, "idea.module.testSourceDirs");
-            for (val testSourceSet : testSourceSets) {
+            for (var testSourceSet : testSourceSets) {
                 assertTrue(
                     testSourceDirs.containsAll(testSourceSet.getAllJava().getSrcDirs()),
                     testSourceSet.getName()
@@ -481,15 +480,15 @@ class TestSourceSetsPluginTest {
 
         @Test
         void ideaModuleTestResourceDirsContainsDirsOfAllTestSourceSets() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val testResourceDirs = getTestResourceDirs(module);
+            var testResourceDirs = getTestResourceDirs(module);
             assertNotNull(testResourceDirs, "idea.module.testResourceDirs");
-            for (val testSourceSet : testSourceSets) {
+            for (var testSourceSet : testSourceSets) {
                 assertTrue(
                     testResourceDirs.containsAll(testSourceSet.getResources().getSrcDirs()),
                     testSourceSet.getName()
@@ -499,35 +498,35 @@ class TestSourceSetsPluginTest {
 
         @Test
         void ideaModuleSingleEntryLibrariesContainsDirsOfMainSourceSet() {
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val singleEntryLibraries = module.getSingleEntryLibraries();
+            var singleEntryLibraries = module.getSingleEntryLibraries();
             assertNotNull(singleEntryLibraries, "idea.module.singleEntryLibraries");
-            val singleEntryLibrariesRuntime = singleEntryLibraries.get("RUNTIME");
+            var singleEntryLibrariesRuntime = singleEntryLibraries.get("RUNTIME");
             assertNotNull(singleEntryLibrariesRuntime, "idea.module.singleEntryLibraries.RUNTIME");
 
-            val runtimeDirs = stream(singleEntryLibrariesRuntime.spliterator(), false).collect(toList());
-            val sourceSets = getExtension(project, SourceSetContainer.class);
-            val mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
+            var runtimeDirs = stream(singleEntryLibrariesRuntime.spliterator(), false).collect(toList());
+            var sourceSets = getExtension(project, SourceSetContainer.class);
+            var mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
             assertTrue(runtimeDirs.containsAll(mainSourceSet.getOutput().getDirs().getFiles()));
         }
 
         @Test
         void ideaModuleSingleEntryLibrariesContainsDirsOfAllTestSourceSets() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
-            val idea = getExtension(project, IdeaModel.class);
-            val module = idea.getModule();
+            var idea = getExtension(project, IdeaModel.class);
+            var module = idea.getModule();
             assertNotNull(module, "idea.module");
-            val singleEntryLibraries = module.getSingleEntryLibraries();
+            var singleEntryLibraries = module.getSingleEntryLibraries();
             assertNotNull(singleEntryLibraries, "idea.module.singleEntryLibraries");
-            val singleEntryLibrariesTest = singleEntryLibraries.get("TEST");
+            var singleEntryLibrariesTest = singleEntryLibraries.get("TEST");
             assertNotNull(singleEntryLibrariesTest, "idea.module.singleEntryLibraries.TEST");
 
-            val testDirs = stream(singleEntryLibrariesTest.spliterator(), false).collect(toList());
-            for (val testSourceSet : testSourceSets) {
+            var testDirs = stream(singleEntryLibrariesTest.spliterator(), false).collect(toList());
+            for (var testSourceSet : testSourceSets) {
                 assertTrue(
                     testDirs.containsAll(testSourceSet.getOutput().getDirs().getFiles()),
                     testSourceSet.getName()
@@ -550,11 +549,11 @@ class TestSourceSetsPluginTest {
 
         @Test
         void eclipseModuleTestSourceSetsContainsAllTestSourceSets() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
-            val eclipse = getExtension(project, EclipseModel.class);
-            val classpath = eclipse.getClasspath();
+            var eclipse = getExtension(project, EclipseModel.class);
+            var classpath = eclipse.getClasspath();
             assertNotNull(classpath, "eclipse.classpath");
 
             assertThat(classpath.getTestSourceSets().get())
@@ -563,14 +562,14 @@ class TestSourceSetsPluginTest {
 
         @Test
         void eclipseModuleTestConfigurationsContainsAllConfigurationsOfAllTestSourceSets() {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.create("anotherTest");
 
-            val eclipse = getExtension(project, EclipseModel.class);
-            val classpath = eclipse.getClasspath();
+            var eclipse = getExtension(project, EclipseModel.class);
+            var classpath = eclipse.getClasspath();
             assertNotNull(classpath, "eclipse.classpath");
 
-            val allTestSourceSetConfigurations = testSourceSets.stream()
+            var allTestSourceSetConfigurations = testSourceSets.stream()
                 .map(SourceSetUtils::getSourceSetConfigurationNames)
                 .flatMap(Collection::stream)
                 .map(project.getConfigurations()::findByName)

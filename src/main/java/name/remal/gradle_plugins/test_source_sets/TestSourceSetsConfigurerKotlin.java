@@ -1,6 +1,5 @@
 package name.remal.gradle_plugins.test_source_sets;
 
-import static java.util.Arrays.asList;
 import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradle_plugins.test_source_sets.Utils.classOf;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
@@ -8,9 +7,9 @@ import static name.remal.gradle_plugins.toolkit.PluginManagerUtils.withAnyOfPlug
 import static name.remal.gradle_plugins.toolkit.reflection.MembersFinder.findMethod;
 import static org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME;
 
+import java.util.List;
 import lombok.CustomLog;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
@@ -20,7 +19,7 @@ import org.gradle.api.Project;
 abstract class TestSourceSetsConfigurerKotlin {
 
     public static void configureKotlinTestSourceSets(Project project) {
-        val kotlinPlugins = asList(
+        var kotlinPlugins = List.of(
             "kotlin",
             "kotlin2js",
             "kotlin-platform-common"
@@ -34,11 +33,11 @@ abstract class TestSourceSetsConfigurerKotlin {
 
     @SuppressWarnings("unchecked")
     private static void configureKotlinTarget(Project project) {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        val kotlin = getExtension(project, "kotlin");
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var kotlin = getExtension(project, "kotlin");
 
         final Object target;
-        val getTarget = findMethod(classOf(kotlin), Object.class, "getTarget");
+        var getTarget = findMethod(classOf(kotlin), Object.class, "getTarget");
         if (getTarget != null) {
             target = getTarget.invoke(kotlin);
             if (target == null) {
@@ -51,13 +50,13 @@ abstract class TestSourceSetsConfigurerKotlin {
         }
 
         final NamedDomainObjectContainer<Named> compilations;
-        val getCompilations = findMethod(
+        var getCompilations = findMethod(
             classOf(target),
             NamedDomainObjectContainer.class,
             "getCompilations"
         );
         if (getCompilations != null) {
-            compilations = (NamedDomainObjectContainer<Named>) getCompilations.invoke(target);
+            compilations = getCompilations.invoke(target);
             if (compilations == null) {
                 logger.warn("kotlin.target.compilations == null");
                 return;
@@ -67,8 +66,8 @@ abstract class TestSourceSetsConfigurerKotlin {
             return;
         }
 
-        val mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
-        val associateWith = findMethod(
+        var mainCompilation = compilations.getByName(MAIN_SOURCE_SET_NAME);
+        var associateWith = findMethod(
             classOf(mainCompilation),
             "associateWith",
             classOf(mainCompilation)

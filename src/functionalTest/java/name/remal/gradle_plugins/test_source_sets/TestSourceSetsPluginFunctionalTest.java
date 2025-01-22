@@ -5,7 +5,6 @@ import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.AL
 import static name.remal.gradle_plugins.toolkit.testkit.GradleDependencyVersions.getCorrespondingKotlinVersion;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,7 +110,7 @@ class TestSourceSetsPluginFunctionalTest {
     @MinSupportedGradleVersion("6.1")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         project.forBuildFile(build -> {
-            val kotlinVersion = getCorrespondingKotlinVersion();
+            var kotlinVersion = getCorrespondingKotlinVersion();
             build.applyPlugin("org.jetbrains.kotlin.jvm", kotlinVersion);
 
             build.line(join("\n", new String[]{

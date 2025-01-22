@@ -8,7 +8,6 @@ import static name.remal.gradle_plugins.toolkit.SourceSetUtils.getSourceSetConfi
 
 import java.util.Objects;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.util.GradleVersion;
@@ -30,9 +29,9 @@ abstract class TestSourceSetsConfigurerEclipse {
 
     @SuppressWarnings("UnstableApiUsage")
     private static void configureEclipseImpl(Project project) {
-        val eclipseModel = getExtension(project, EclipseModel.class);
-        val eclipseClasspath = eclipseModel.getClasspath();
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var eclipseModel = getExtension(project, EclipseModel.class);
+        var eclipseClasspath = eclipseModel.getClasspath();
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.configureEach(testSourceSet -> {
             eclipseClasspath.getTestSourceSets().add(testSourceSet);
             eclipseClasspath.getTestConfigurations().addAll(

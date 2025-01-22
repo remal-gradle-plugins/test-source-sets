@@ -10,7 +10,6 @@ import static name.remal.gradle_plugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.IdeaModuleUtils;
 import org.gradle.api.Project;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
@@ -26,15 +25,15 @@ abstract class TestSourceSetsConfigurerIdea {
     }
 
     private static void configureIdeaImpl(Project project) {
-        val ideaModel = getExtension(project, IdeaModel.class);
-        val module = ideaModel.getModule();
+        var ideaModel = getExtension(project, IdeaModel.class);
+        var module = ideaModel.getModule();
         if (module != null) {
             configureIdeaModule(project, module);
         }
     }
 
     private static void configureIdeaModule(Project project, IdeaModule module) {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
 
         testSourceSets.configureEach(testSourceSet -> {
             project.getConfigurations().configureEach(conf -> {
@@ -44,8 +43,8 @@ abstract class TestSourceSetsConfigurerIdea {
                     if (module.getScopes() == null) {
                         module.setScopes(new LinkedHashMap<>());
                     }
-                    val testScope = module.getScopes().computeIfAbsent("TEST", key -> new LinkedHashMap<>());
-                    val testPlusScope = testScope.computeIfAbsent("plus", key -> new ArrayList<>());
+                    var testScope = module.getScopes().computeIfAbsent("TEST", key -> new LinkedHashMap<>());
+                    var testPlusScope = testScope.computeIfAbsent("plus", key -> new ArrayList<>());
                     testPlusScope.add(conf);
                 }
             });

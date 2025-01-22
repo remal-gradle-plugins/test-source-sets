@@ -10,7 +10,6 @@ import static org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_
 
 import java.io.File;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -25,9 +24,9 @@ abstract class TestSourceSetsConfigurerJacoco {
 
     public static void configureJacoco(Project project) {
         project.getPluginManager().withPlugin("jacoco", __ -> {
-            val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+            var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             testSourceSets.configureEach(sourceSet -> {
-                val testTask = project.getTasks().named(getTestTaskName(sourceSet), Test.class);
+                var testTask = project.getTasks().named(getTestTaskName(sourceSet), Test.class);
                 createJacocoReportTask(project, testTask);
                 createJacocoCoverageVerificationTask(project, testTask);
             });
@@ -35,10 +34,10 @@ abstract class TestSourceSetsConfigurerJacoco {
     }
 
     private static void createJacocoReportTask(Project project, TaskProvider<?> testTask) {
-        val tasks = project.getTasks();
+        var tasks = project.getTasks();
 
         final TaskProvider<JacocoReport> jacocoReportTask;
-        val jacocoReportTaskName = "jacoco" + capitalize(testTask.getName()) + "Report";
+        var jacocoReportTaskName = "jacoco" + capitalize(testTask.getName()) + "Report";
         if (tasks.getNames().contains(jacocoReportTaskName)) {
             jacocoReportTask = tasks.named(jacocoReportTaskName, JacocoReport.class);
 
@@ -66,10 +65,10 @@ abstract class TestSourceSetsConfigurerJacoco {
     }
 
     private static void createJacocoCoverageVerificationTask(Project project, TaskProvider<?> testTask) {
-        val tasks = project.getTasks();
+        var tasks = project.getTasks();
 
         final TaskProvider<JacocoCoverageVerification> jacocoVerificationTask;
-        val jacocoVerificationTaskName = "jacoco" + capitalize(testTask.getName()) + "CoverageVerification";
+        var jacocoVerificationTaskName = "jacoco" + capitalize(testTask.getName()) + "CoverageVerification";
         if (tasks.getNames().contains(jacocoVerificationTaskName)) {
             jacocoVerificationTask = tasks.named(jacocoVerificationTaskName, JacocoCoverageVerification.class);
 
@@ -99,7 +98,7 @@ abstract class TestSourceSetsConfigurerJacoco {
 
     private static Provider<File> createExecutionDataProvider(Project project, TaskProvider<?> testTask) {
         return project.provider(() -> {
-            val testTaskJacoco = getExtension(testTask.get(), JacocoTaskExtension.class);
+            var testTaskJacoco = getExtension(testTask.get(), JacocoTaskExtension.class);
             return testTaskJacoco.getDestinationFile();
         });
     }

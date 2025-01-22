@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.CustomLog;
 import lombok.SneakyThrows;
-import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
@@ -70,11 +69,11 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             // do nothing
         }
 
-        val testSourceSets = createTestSourceSetContainer(project);
+        var testSourceSets = createTestSourceSetContainer(project);
         addExtension(project, TestSourceSetContainer.class, TEST_SOURCE_SETS_EXTENSION_NAME, testSourceSets);
 
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
         testSourceSets.add(testSourceSet);
 
         configureConfigurations(project);
@@ -92,12 +91,12 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     @SneakyThrows
     @SuppressWarnings("Slf4jFormatShouldBeConst")
     private static TestSourceSetContainer createTestSourceSetContainer(Project project) {
-        val testSuffixCheck = project.getObjects().property(TestSuffixCheckMode.class);
+        var testSuffixCheck = project.getObjects().property(TestSuffixCheckMode.class);
         testSuffixCheck.convention(TestSuffixCheckMode.FAIL);
 
         Consumer<String> checkTestSourceSetName = name -> {
             if (!name.endsWith("Test")) {
-                val message = format(
+                var message = format(
                     "Test source set name does NOT end with `Test`: `%s`. It violates principles of"
                         + " `jvm-test-suite` Gradle plugin. Please add `Test` suffix to the test source set name."
                         + " If you want to configure or disable this check, see the plugin's"
@@ -105,7 +104,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                     name,
                     PLUGIN_REPOSITORY_HTML_URL
                 );
-                val testSuffixCheckMode = testSuffixCheck.getOrNull();
+                var testSuffixCheckMode = testSuffixCheck.getOrNull();
                 if (testSuffixCheckMode == TestSuffixCheckMode.FAIL) {
                     throw new InvalidTestSourceSetNameSuffix(message);
                 } else if (testSuffixCheckMode == TestSuffixCheckMode.WARN) {
@@ -114,7 +113,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             }
         };
 
-        val testSourceSets = project.container(
+        var testSourceSets = project.container(
             SourceSet.class,
             name -> {
                 checkTestSourceSetName.accept(name);
@@ -122,11 +121,11 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             }
         );
 
-        val sourceSets = getExtension(project, SourceSetContainer.class);
+        var sourceSets = getExtension(project, SourceSetContainer.class);
         sourceSets.whenObjectRemoved(testSourceSets::remove);
         testSourceSets.whenObjectRemoved(sourceSets::remove);
 
-        val getTestSuffixCheckMethod = TestSourceSetContainer.class.getMethod("getTestSuffixCheck");
+        var getTestSuffixCheckMethod = TestSourceSetContainer.class.getMethod("getTestSuffixCheck");
         return toDynamicInterface(testSourceSets, TestSourceSetContainer.class, invocationHandler -> {
             invocationHandler.add(getTestSuffixCheckMethod::equals, (proxy, method, args) -> testSuffixCheck);
         });
@@ -143,8 +142,8 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
     @SuppressWarnings("UnstableApiUsage")
     private static SourceSet createTestSuiteSourceSet(Project project, String name) {
-        val testing = getExtension(project, TestingExtension.class);
-        val testSuite = testing.getSuites().create(name, JvmTestSuite.class);
+        var testing = getExtension(project, TestingExtension.class);
+        var testSuite = testing.getSuites().create(name, JvmTestSuite.class);
         return testSuite.getSources();
     }
 
@@ -154,10 +153,10 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
 
     private static void configureConfigurations(Project project) {
-        val configurations = project.getConfigurations();
+        var configurations = project.getConfigurations();
 
-        val testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet ->
             forConfigurations(testSourceSet, sourceSet, (testConfName, confName) -> {
                 configurations
@@ -185,9 +184,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         SourceSet sourceSet2,
         BiConsumer<String, String> action
     ) {
-        for (val method : GET_CONFIGURATION_NAME_METHODS) {
-            val confName1 = method.invoke(sourceSet1);
-            val confName2 = method.invoke(sourceSet2);
+        for (var method : GET_CONFIGURATION_NAME_METHODS) {
+            var confName1 = method.invoke(sourceSet1);
+            var confName2 = method.invoke(sourceSet2);
             if (confName1 == null
                 || confName2 == null
                 || Objects.equals(confName1, confName2)
@@ -200,12 +199,12 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
     private static void configureClasspaths(Project project) {
-        val sourceSets = getExtension(project, SourceSetContainer.class);
-        val mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
-        val testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
-        val confs = project.getConfigurations();
+        var sourceSets = getExtension(project, SourceSetContainer.class);
+        var mainSourceSet = sourceSets.getByName(MAIN_SOURCE_SET_NAME);
+        var testSourceSet = sourceSets.getByName(TEST_SOURCE_SET_NAME);
+        var confs = project.getConfigurations();
 
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet -> {
             sourceSet.setCompileClasspath(
                 mainSourceSet.getOutput()
@@ -221,7 +220,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
 
     private static void configureTestTasks(Project project) {
-        val allTestsTask = project.getTasks().register(
+        var allTestsTask = project.getTasks().register(
             ALL_TESTS_TASK_NAME, task -> {
                 task.setGroup(VERIFICATION_GROUP);
                 task.setDescription("Run test task for each test-source-set");
@@ -229,9 +228,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             }
         );
 
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.whenObjectAdded(testSourceSet -> {
-            val testTaskName = getTestTaskName(testSourceSet);
+            var testTaskName = getTestTaskName(testSourceSet);
             allTestsTask.configure(it -> it.dependsOn(testTaskName));
 
             if (project.getTasks().getNames().contains(testTaskName)) {
@@ -266,10 +265,10 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
 
     private static void configureTestTaskExtensions(Project project) {
-        val testSourceSets = getExtension(project, TestSourceSetContainer.class);
+        var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.configureEach(testSourceSet -> {
-            val testTaskName = getTestTaskName(testSourceSet);
-            val testTaskProvider = project.getTasks().named(testTaskName, Test.class);
+            var testTaskName = getTestTaskName(testSourceSet);
+            var testTaskProvider = project.getTasks().named(testTaskName, Test.class);
             getExtensions(testSourceSet).add(
                 new TypeOf<TaskProvider<Test>>() { },
                 TEST_TASK_EXTENSION_NAME,

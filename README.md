@@ -138,6 +138,11 @@ A Gradle plugin that applies `name.remal.test-source-sets` plugin and creates `i
 
 # Migration guide
 
+## Version 4.* to 5.*
+
+The minimum Java version is 11 (from 8).
+The minimum Gradle version is 7.0 (from 6.0).
+
 ## Version 3.* to 4.*
 
 `testTaskName` convention property is not added anymore to each test source set. Test tasks now have their names equal to test source set names.
