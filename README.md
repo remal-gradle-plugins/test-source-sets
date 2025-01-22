@@ -11,7 +11,7 @@ Usage:
 <!--plugin-usage:name.remal.test-source-sets-->
 ```groovy
 plugins {
-    id 'name.remal.test-source-sets' version '4.1.10'
+    id 'name.remal.test-source-sets' version '5.0.0'
 }
 ```
 <!--/plugin-usage-->
@@ -127,7 +127,7 @@ Usage:
 <!--plugin-usage:name.remal.integration-tests-->
 ```groovy
 plugins {
-    id 'name.remal.integration-tests' version '4.1.10'
+    id 'name.remal.integration-tests' version '5.0.0'
 }
 ```
 <!--/plugin-usage-->
