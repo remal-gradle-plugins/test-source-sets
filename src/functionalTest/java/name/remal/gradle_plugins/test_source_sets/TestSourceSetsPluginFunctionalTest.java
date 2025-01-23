@@ -1,9 +1,13 @@
 package name.remal.gradle_plugins.test_source_sets;
 
 import static java.lang.String.join;
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
-import static name.remal.gradle_plugins.toolkit.testkit.GradleDependencyVersions.getCorrespondingKotlinVersion;
+import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryFilePaths;
 
+import java.nio.file.Path;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
@@ -22,22 +26,35 @@ class TestSourceSetsPluginFunctionalTest {
             build.line("testSourceSets { additionalTest }");
 
             build.line("repositories { mavenCentral() }");
+
+            build.block("dependencies", deps -> {
+                deps.line(
+                    "testImplementation files(%s)",
+                    getTestClasspathLibraryFilePaths("org.junit.jupiter:junit-jupiter-api").stream()
+                        .map(Path::toString)
+                        .map(path -> "'" + deps.escapeString(path) + "'")
+                        .collect(joining(", "))
+                );
+
+                deps.line(
+                    "testRuntimeOnly files(%s)",
+                    getTestClasspathLibraryFilePaths("org.junit.jupiter:junit-jupiter-engine").stream()
+                        .map(Path::toString)
+                        .map(path -> "'" + deps.escapeString(path) + "'")
+                        .collect(joining(", "))
+                );
+                deps.line(
+                    "testRuntimeOnly files(%s)",
+                    getTestClasspathLibraryFilePaths("org.junit.platform:junit-platform-launcher").stream()
+                        .map(Path::toString)
+                        .map(path -> "'" + deps.escapeString(path) + "'")
+                        .collect(joining(", "))
+                );
+            });
+
             build.line(join("\n", new String[]{
-                "Dependency junitDependency = dependencies.create('junit:junit:4.13.2')",
-                "project.configurations.with { configurations ->",
-                "    testSourceSets.all { SourceSet sourceSet ->",
-                "        configurations[sourceSet.implementationConfigurationName]",
-                "            .dependencies",
-                "            .add(junitDependency)",
-                "    }",
-                "}",
-                "",
                 "tasks.withType(Test).configureEach {",
-                "    try {",
-                "        useJUnit()",
-                "    } catch (IllegalStateException ignored) {",
-                "        // do nothing",
-                "    }",
+                "    useJUnitPlatform()",
                 "    enableAssertions = true",
                 "    testLogging {",
                 "        showExceptions = true",
@@ -55,7 +72,7 @@ class TestSourceSetsPluginFunctionalTest {
                 "    parentFile.mkdirs()",
                 "    write([",
                 "        'package pkg;',",
-                "        'import org.junit.Test;',",
+                "        'import org.junit.jupiter.api.Test;',",
                 "        'public class JavaTest {',",
                 "        '    @Test',",
                 "        '    public void test() {}',",
@@ -70,7 +87,7 @@ class TestSourceSetsPluginFunctionalTest {
                 "    parentFile.mkdirs()",
                 "    write([",
                 "        'package pkg;',",
-                "        'import org.junit.Test;',",
+                "        'import org.junit.jupiter.api.Test;',",
                 "        'public class JavaAdditionalTest {',",
                 "        '    @Test',",
                 "        '    public void test() {}',",
@@ -110,7 +127,9 @@ class TestSourceSetsPluginFunctionalTest {
     @MinSupportedGradleVersion("6.1")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         project.forBuildFile(build -> {
-            var kotlinVersion = getCorrespondingKotlinVersion();
+            var kotlinVersion = Optional.ofNullable(System.getProperty("corresponding-kotlin.version"))
+                .filter(not(String::isEmpty))
+                .orElseThrow();
             build.applyPlugin("org.jetbrains.kotlin.jvm", kotlinVersion);
 
             build.line(join("\n", new String[]{
@@ -127,7 +146,7 @@ class TestSourceSetsPluginFunctionalTest {
                 "    parentFile.mkdirs()",
                 "    write([",
                 "        'package pkg',",
-                "        'import org.junit.Test',",
+                "        'import org.junit.jupiter.api.Test',",
                 "        'class KotlinAdditionalTest {',",
                 "        '    @Test',",
                 "        '    fun test() {',",
