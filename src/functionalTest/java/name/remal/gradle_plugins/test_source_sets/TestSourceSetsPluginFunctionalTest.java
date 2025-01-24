@@ -11,6 +11,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
+import name.remal.gradle_plugins.toolkit.testkit.functional.SuppressedMessage;
+import org.gradle.util.GradleVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -147,6 +149,13 @@ class TestSourceSetsPluginFunctionalTest {
         });
 
         project.withoutConfigurationCache();
+
+        project.addSuppressedDeprecationMessage(SuppressedMessage.builder()
+            .message("Classpath configuration has been deprecated for dependency declaration")
+            .stackTracePrefix("org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinCompilation.")
+            .maxGradleVersion(GradleVersion.version("7.1.9999"))
+            .build()
+        );
 
         project.assertBuildSuccessfully(ALL_TESTS_TASK_NAME);
     }
