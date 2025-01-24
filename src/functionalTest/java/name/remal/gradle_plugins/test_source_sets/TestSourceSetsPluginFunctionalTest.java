@@ -110,7 +110,7 @@ class TestSourceSetsPluginFunctionalTest {
     }
 
     @Test
-    @MinSupportedGradleVersion("6.1")
+    @MinSupportedGradleVersion("7.2")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         project.forBuildFile(build -> {
             var kotlinVersion = Optional.ofNullable(System.getProperty("corresponding-kotlin.version"))
