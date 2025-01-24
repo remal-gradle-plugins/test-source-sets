@@ -3,6 +3,7 @@ package name.remal.gradle_plugins.test_source_sets;
 import static java.lang.String.join;
 import static java.util.function.Predicate.not;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.ALL_TESTS_TASK_NAME;
+import static name.remal.gradle_plugins.toolkit.GradleVersionUtils.isCurrentGradleVersionGreaterThanOrEqualTo;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
 import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryVersion;
 
@@ -44,6 +45,7 @@ class TestSourceSetsPluginFunctionalTest {
 
             build.line(join("\n", new String[]{
                 "tasks.withType(Test).configureEach {",
+                "    " + (isCurrentGradleVersionGreaterThanOrEqualTo("8.2") ? "useJUnitPlatform()" : ""),
                 "    enableAssertions = true",
                 "    testLogging {",
                 "        showExceptions = true",
