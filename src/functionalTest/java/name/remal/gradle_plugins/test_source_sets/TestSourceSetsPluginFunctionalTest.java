@@ -9,7 +9,7 @@ import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestCla
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
+import name.remal.gradle_plugins.toolkit.testkit.MinTestableGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,7 +110,7 @@ class TestSourceSetsPluginFunctionalTest {
     }
 
     @Test
-    @MinSupportedGradleVersion("7.2")
+    @MinTestableGradleVersion("7.2")
     void kotlinBuildWithInternalVisibilityPerformsSuccessfully() {
         project.forBuildFile(build -> {
             var kotlinVersion = Optional.ofNullable(System.getProperty("corresponding-kotlin.version"))
