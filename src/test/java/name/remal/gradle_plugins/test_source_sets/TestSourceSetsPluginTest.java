@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import name.remal.gradle_plugins.toolkit.SourceSetUtils;
 import name.remal.gradle_plugins.toolkit.reflection.TypedMethod0;
 import name.remal.gradle_plugins.toolkit.testkit.ApplyPlugin;
-import name.remal.gradle_plugins.toolkit.testkit.MinSupportedGradleVersion;
+import name.remal.gradle_plugins.toolkit.testkit.MinTestableGradleVersion;
 import name.remal.gradle_plugins.toolkit.testkit.TaskValidations;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
@@ -73,7 +73,7 @@ class TestSourceSetsPluginTest {
     }
 
     @Test
-    @MinSupportedGradleVersion("7.3")
+    @MinTestableGradleVersion("7.3")
     void appliesJvmTestSuitePlugin() {
         assertTrue(project.getPluginManager().hasPlugin("jvm-test-suite"));
     }
@@ -314,7 +314,7 @@ class TestSourceSetsPluginTest {
         }
 
         @Test
-        @MinSupportedGradleVersion("6.4")
+        @MinTestableGradleVersion("6.4")
         void createdTestTaskHasCorrectModularitySettings() {
             JavaPluginExtension javaPluginExtension = getExtension(project, JavaPluginExtension.class);
             assertNotNull(integrationTestTask);
@@ -378,7 +378,7 @@ class TestSourceSetsPluginTest {
         }
 
         @Test
-        @MinSupportedGradleVersion("6.1")
+        @MinTestableGradleVersion("6.1")
         void allTestSourceSetsAreAssociatedWithMainCompilation() {
             var kotlin = getExtension(project, KotlinSingleTargetExtension.class);
             var testSourceSets = getExtension(project, TestSourceSetContainer.class);
@@ -538,7 +538,7 @@ class TestSourceSetsPluginTest {
 
 
     @Nested
-    @MinSupportedGradleVersion("7.5")
+    @MinTestableGradleVersion("7.5")
     @SuppressWarnings("UnstableApiUsage")
     class IfEclipsePluginIsApplied {
 
