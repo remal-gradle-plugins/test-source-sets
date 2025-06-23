@@ -2,5 +2,5 @@
 # Do not modify it yourself unless you know what you are doing.
 
 org.ow2.asm:asm-bom:9.8:@pom
-zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin$1:cc1e45194ed43ae16b907327ca123cc29edc31503a68ba3534208773252351d4
-zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin:91aba4bc7ae571d62f2e9e61f0b805c3236f0d7c8a634d66a3a3c01aaae4b21
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin$1:851ebccff35da1e4676bae610ae146c0cb6aa3913e3339f4cf20bc177af86366
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin:52767bfa8769023852eea5bc414e83661fd8abacf0f7f302f43c97e0c345129
