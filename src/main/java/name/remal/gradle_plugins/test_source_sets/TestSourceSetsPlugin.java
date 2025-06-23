@@ -12,6 +12,8 @@ import static name.remal.gradle_plugins.test_source_sets.TestTaskNameUtils.getTe
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.addExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradle_plugins.toolkit.ExtensionContainerUtils.getExtensions;
+import static name.remal.gradle_plugins.toolkit.GradleVersionUtils.isCurrentGradleVersionGreaterThanOrEqualTo;
+import static name.remal.gradle_plugins.toolkit.GradleVersionUtils.isCurrentGradleVersionLessThan;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.ProxyUtils.toDynamicInterface;
 import static org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME;
@@ -32,7 +34,6 @@ import lombok.SneakyThrows;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.internal.ConventionMapping;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.plugins.UnknownPluginException;
@@ -43,7 +44,6 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.base.TestingExtension;
-import org.gradle.util.GradleVersion;
 
 @CustomLog
 public class TestSourceSetsPlugin implements Plugin<Project> {
@@ -55,8 +55,11 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     public static final String TEST_TASK_EXTENSION_NAME = doNotInline("testTask");
 
 
+    private static final boolean IS_TEST_TASK_CONVENTION_MAPPING_SUPPORTED =
+        isCurrentGradleVersionLessThan("7.3");
+
     private static final boolean IS_MODULARITY_SUPPORTED =
-        GradleVersion.current().compareTo(GradleVersion.version("6.4")) >= 0;
+        isCurrentGradleVersionGreaterThanOrEqualTo("6.4");
 
 
     @Override
@@ -241,20 +244,27 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                 task.setGroup(VERIFICATION_GROUP);
                 task.setDescription("Runs " + testSourceSet.getName() + " tests");
 
-                ConventionMapping conventionMapping = task.getConventionMapping();
-                conventionMapping.map(
-                    "testClassesDirs",
-                    (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
-                );
-                conventionMapping.map(
-                    "classpath",
-                    (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
-                );
+                if (IS_TEST_TASK_CONVENTION_MAPPING_SUPPORTED) {
+                    configureTestTaskConventionMapping(task, testSourceSet);
+                }
+
                 if (IS_MODULARITY_SUPPORTED) {
                     configureTestTaskModularity(project, task);
                 }
             });
         });
+    }
+
+    private static void configureTestTaskConventionMapping(Test testTask, SourceSet testSourceSet) {
+        var conventionMapping = testTask.getConventionMapping();
+        conventionMapping.map(
+            "testClassesDirs",
+            (Callable<FileCollection>) () -> testSourceSet.getOutput().getClassesDirs()
+        );
+        conventionMapping.map(
+            "classpath",
+            (Callable<FileCollection>) testSourceSet::getRuntimeClasspath
+        );
     }
 
     private static void configureTestTaskModularity(Project project, Test testTask) {
@@ -264,13 +274,15 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
     }
 
 
+    private static final TypeOf<TaskProvider<Test>> TEST_TASK_EXTENSION_TYPE = new TypeOf<>() { };
+
     private static void configureTestTaskExtensions(Project project) {
         var testSourceSets = getExtension(project, TestSourceSetContainer.class);
         testSourceSets.configureEach(testSourceSet -> {
             var testTaskName = getTestTaskName(testSourceSet);
             var testTaskProvider = project.getTasks().named(testTaskName, Test.class);
             getExtensions(testSourceSet).add(
-                new TypeOf<TaskProvider<Test>>() { },
+                TEST_TASK_EXTENSION_TYPE,
                 TEST_TASK_EXTENSION_NAME,
                 testTaskProvider
             );

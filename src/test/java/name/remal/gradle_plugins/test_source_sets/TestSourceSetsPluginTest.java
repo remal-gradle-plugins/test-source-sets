@@ -298,19 +298,22 @@ class TestSourceSetsPluginTest {
         @Test
         void createdTestTaskHasCorrectTestClassesDirs() {
             assertNotNull(integrationTestTask);
-            assertSame(
-                integrationTestTask.getTestClassesDirs(),
-                integrationSourceSet.getOutput().getClassesDirs()
-            );
+            assertThat(integrationTestTask.getTestClassesDirs().getFiles())
+                .isNotEmpty()
+                .containsExactlyElementsOf(integrationSourceSet.getOutput().getClassesDirs().getFiles());
         }
 
         @Test
         void createdTestTaskHasCorrectClasspath() {
-            assertNotNull(integrationTestTask);
-            assertSame(
-                integrationTestTask.getClasspath(),
-                integrationSourceSet.getRuntimeClasspath()
+            var runtimeClasspath = project.files(
+                project.file("integrationSourceSet.runtime.jar")
             );
+            integrationSourceSet.setRuntimeClasspath(runtimeClasspath);
+
+            assertNotNull(integrationTestTask);
+            assertThat(integrationTestTask.getClasspath().getFiles())
+                .isNotEmpty()
+                .containsExactlyElementsOf(integrationSourceSet.getRuntimeClasspath().getFiles());
         }
 
         @Test
