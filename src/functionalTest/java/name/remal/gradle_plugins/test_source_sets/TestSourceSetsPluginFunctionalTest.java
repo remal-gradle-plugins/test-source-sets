@@ -146,6 +146,8 @@ class TestSourceSetsPluginFunctionalTest {
             }));
         });
 
+        project.setGradleProperty("kotlin.jvm.target.validation.mode", "warning");
+
         project.withoutConfigurationCache();
 
         project.assertBuildSuccessfully(ALL_TESTS_TASK_NAME);
