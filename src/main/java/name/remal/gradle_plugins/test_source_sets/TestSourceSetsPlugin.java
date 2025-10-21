@@ -2,7 +2,7 @@ package name.remal.gradle_plugins.test_source_sets;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static name.remal.gradle_plugins.test_source_sets.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
+import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerEclipse.configureEclipse;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerIdea.configureIdea;
 import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsConfigurerJacoco.configureJacoco;
@@ -105,7 +105,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
                         + " If you want to configure or disable this check, see the plugin's"
                         + " documentation: %s#test-source-set-name-suffix-check",
                     name,
-                    PLUGIN_REPOSITORY_HTML_URL
+                    getStringProperty("repository.html-url")
                 );
                 var testSuffixCheckMode = testSuffixCheck.getOrNull();
                 if (testSuffixCheckMode == TestSuffixCheckMode.FAIL) {

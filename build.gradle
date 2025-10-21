@@ -49,19 +49,3 @@ gradlePlugin {
         }
     }
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-generateSources.forMainSourceSet.java {
-    String repositoryHtmlUrl = project.ext['repository-html-url']
-    inputs.property('repository-html-url', repositoryHtmlUrl)
-    classFile(project.calculateBaseJavaPackage(), 'DocUtils') {
-        addStaticImport("lombok.AccessLevel", "PRIVATE")
-        addImport("lombok.NoArgsConstructor")
-
-        line("@NoArgsConstructor(access = PRIVATE)")
-        block("abstract class ${simpleName}") {
-            line("public static final String PLUGIN_REPOSITORY_HTML_URL = \"${escapeString(repositoryHtmlUrl)}\";")
-        }
-    }
-}
