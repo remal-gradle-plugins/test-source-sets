@@ -3,4 +3,4 @@
 
 org.ow2.asm:asm-bom:9.9:@pom
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin$1:851ebccff35da1e4676bae610ae146c0cb6aa3913e3339f4cf20bc177af86366
-zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin:52767bfa8769023852eea5bc414e83661fd8abacf0f7f302f43c97e0c345129
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin:91aec65058d1c8d3464ccbcfcf28551eeb2290f8b636bbaadf3677ea7c516368
