@@ -39,7 +39,6 @@ gradlePlugin {
             id = 'name.remal.test-source-sets'
             implementationClass = 'name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin'
             displayName = 'A plugin that creates `testSourceSets` extension'
-            description = property('repository-description')
         }
         'name.remal.integration-tests' {
             id = 'name.remal.integration-tests'
