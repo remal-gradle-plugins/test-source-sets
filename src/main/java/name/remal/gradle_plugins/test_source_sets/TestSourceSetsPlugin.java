@@ -116,7 +116,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
             }
         };
 
-        var testSourceSets = project.container(
+        var testSourceSets = project.getObjects().domainObjectContainer(
             SourceSet.class,
             name -> {
                 checkTestSourceSetName.accept(name);
