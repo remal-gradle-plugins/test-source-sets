@@ -1,6 +1,6 @@
 **Tested on Java LTS versions from <!--property:java-runtime.min-version-->11<!--/property--> to <!--property:java-runtime.max-version-->25<!--/property-->.**
 
-**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.3.0-rc-1<!--/property-->.**
+**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.3.0-rc-2<!--/property-->.**
 
 # `name.remal.test-source-sets` plugin
 
@@ -11,7 +11,7 @@ Usage:
 <!--plugin-usage:name.remal.test-source-sets-->
 ```groovy
 plugins {
-    id 'name.remal.test-source-sets' version '5.0.5'
+    id 'name.remal.test-source-sets' version '5.0.6'
 }
 ```
 <!--/plugin-usage-->
@@ -127,7 +127,7 @@ Usage:
 <!--plugin-usage:name.remal.integration-tests-->
 ```groovy
 plugins {
-    id 'name.remal.integration-tests' version '5.0.5'
+    id 'name.remal.integration-tests' version '5.0.6'
 }
 ```
 <!--/plugin-usage-->
