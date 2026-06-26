@@ -160,7 +160,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
         var testSourceSet = getExtension(project, SourceSetContainer.class).getByName(TEST_SOURCE_SET_NAME);
         var testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet ->
+        @SuppressWarnings("ReferenceEquality")
+        var otherTestSourceSets = testSourceSets.matching(it -> it != testSourceSet);
+        otherTestSourceSets.configureEach(sourceSet ->
             forConfigurations(testSourceSet, sourceSet, (testConfName, confName) -> {
                 configurations
                     .matching(it -> it.getName().equals(testConfName))
@@ -208,7 +210,9 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
         var confs = project.getConfigurations();
 
         var testSourceSets = getExtension(project, TestSourceSetContainer.class);
-        testSourceSets.matching(it -> it != testSourceSet).configureEach(sourceSet -> {
+        @SuppressWarnings("ReferenceEquality")
+        var otherTestSourceSets = testSourceSets.matching(it -> it != testSourceSet);
+        otherTestSourceSets.configureEach(sourceSet -> {
             sourceSet.setCompileClasspath(
                 mainSourceSet.getOutput()
                     .plus(confs.getByName(sourceSet.getCompileClasspathConfigurationName()))
