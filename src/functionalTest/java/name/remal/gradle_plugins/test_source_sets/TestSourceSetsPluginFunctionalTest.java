@@ -6,6 +6,7 @@ import static name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin.AL
 import static name.remal.gradle_plugins.toolkit.GradleVersionUtils.isCurrentGradleVersionGreaterThanOrEqualTo;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
 import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryVersion;
+import static name.remal.gradle_plugins.toolkit.testkit.functional.generator.utils.MavenCentralRepositoryUtils.addMavenCentralRepository;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ class TestSourceSetsPluginFunctionalTest {
             build.applyPlugin("name.remal.test-source-sets");
             build.line("testSourceSets { additionalTest }");
 
-            build.line("repositories { mavenCentral() }");
+            addMavenCentralRepository(build);
 
             build.block("dependencies", deps -> {
                 deps.line(
