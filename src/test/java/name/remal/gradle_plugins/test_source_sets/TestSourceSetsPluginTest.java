@@ -42,6 +42,7 @@ import org.gradle.plugins.ide.eclipse.model.EclipseModel;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension;
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -252,8 +253,8 @@ class TestSourceSetsPluginTest {
     class CreatedTestTasks {
 
         private final SourceSet integrationSourceSet;
-        private final org.gradle.api.tasks.testing.Test testTask;
-        private final org.gradle.api.tasks.testing.Test integrationTestTask;
+        private final org.gradle.api.tasks.testing.@Nullable Test testTask;
+        private final org.gradle.api.tasks.testing.@Nullable Test integrationTestTask;
 
         {
             var testSourceSets = getExtension(project, TestSourceSetContainer.class);
@@ -273,7 +274,7 @@ class TestSourceSetsPluginTest {
         @Nested
         class AllTestsTask {
 
-            private final Task allTestsTask = project.getTasks().findByName("allTests");
+            private final @Nullable Task allTestsTask = project.getTasks().findByName("allTests");
 
             @Test
             void allTestsTaskIsCreated() {
