@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.CustomLog;
 import lombok.SneakyThrows;
-import org.gradle.api.Plugin;
+import name.remal.gradle_plugins.toolkit.AbstractSettingsAwarePlugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin;
@@ -46,7 +46,7 @@ import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.base.TestingExtension;
 
 @CustomLog
-public class TestSourceSetsPlugin implements Plugin<Project> {
+public class TestSourceSetsPlugin extends AbstractSettingsAwarePlugin {
 
     public static final String TEST_SOURCE_SETS_EXTENSION_NAME = doNotInline("testSourceSets");
 
@@ -63,7 +63,7 @@ public class TestSourceSetsPlugin implements Plugin<Project> {
 
 
     @Override
-    public void apply(Project project) {
+    protected void applyToProject(Project project) {
         project.getPluginManager().apply(JavaPlugin.class);
 
         try {
