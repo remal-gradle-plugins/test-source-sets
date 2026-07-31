@@ -46,12 +46,22 @@ gradlePlugin {
             id = 'name.remal.test-source-sets'
             implementationClass = 'name.remal.gradle_plugins.test_source_sets.TestSourceSetsPlugin'
             displayName = 'A plugin that creates `testSourceSets` extension'
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
         'name.remal.integration-tests' {
             id = 'name.remal.integration-tests'
             implementationClass = 'name.remal.gradle_plugins.test_source_sets.IntegrationTestsPlugin'
             displayName = 'A plugin that creates `integrationTest` source set for integration tests'
             description = displayName
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
