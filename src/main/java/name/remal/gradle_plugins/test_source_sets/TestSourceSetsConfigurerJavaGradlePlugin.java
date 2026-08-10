@@ -13,7 +13,7 @@ import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 abstract class TestSourceSetsConfigurerJavaGradlePlugin {
 
     public static void configureJavaGradlePlugin(Project project) {
-        project.getPluginManager().withPlugin("java-gradle-plugin", __ -> {
+        project.getPlugins().withId("java-gradle-plugin", __ -> {
             var testSourceSets = getExtension(project, TestSourceSetContainer.class);
             var gradlePluginDev = getExtension(project, GradlePluginDevelopmentExtension.class);
             testSourceSets.whenObjectAdded(testSourceSet -> {
